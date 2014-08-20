@@ -8,9 +8,9 @@ but with some simple edits you can place them where **you** want them.
     * [asciicolor] (https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/asciicolors)
 
  2. Scripts related to managing the EV3-brick
-    * checkpower
-    * showactivity
-    * stopmotors
+    * [checkpower](https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/checkpower)
+    * [showactivity](https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/showactivity)
+    * [stopmotors](https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/stopmotors)
 
  3. Scripts discovering sensors and / or motors
     * blinkleds
