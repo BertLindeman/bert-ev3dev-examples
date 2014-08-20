@@ -1,0 +1,102 @@
+```
+#!/bin/sh -u
+#
+# Purpose: Report active IP-addresses by speach
+#          This script is meant to be run in the boot sequence
+# Environment: Tested upon ev3dev running jessie
+#          It runs Debian jessie at 3.14.7-2-ev3dev-pre1
+#
+# Because this script is meant to run as init script,
+# I used /bin/sh and did not use bash builtin's
+#
+# ------------------------------------------------------------------
+# Author:                         Bert Lindeman
+# Changes:  2014-08-11            Initial version
+# ------------------------------------------------------------------
+# Tell (speak) what IP address(es) this brick has.
+# So you can hear the IP address in stead of pinging to find it.
+#
+reportIF () {
+  #
+  # function: report ip address for this interface
+  #           parameter(s): $1 - interface-id like usb0 or wlan0
+  #
+  extractIP $1
+  echo "$0: Report for interface: \"$1\": $IP"
+  # the interface name is pronounced better if UPCASED and split by periods:
+  IFNAME=`echo $ifname | tr '[:lower:]' '[:upper:]' | sed 's/./&./g'`
+  splitText " $IFNAME $IP"
+  speakText " Interface.  $splitText"
+}
+  #
+  # get the ip address from this interface:
+  #
+extractIP () {
+  #
+  # function: Determine IP address for THIS interface
+  #           parameter(s): $1 - interface-id like usb0 or wlan0
+  #
+  ifcmd="/sbin/ifconfig"
+  cutcmd="cut -d ":" -f2"
+  IP=`echo \`$ifcmd $1 | grep 'inet addr:'|$cutcmd|awk '{ print$1}'\``
+  # echo "Result of extractIP: $IP"
+}
+  #
+splitText () {
+  #
+  # function: split IP-address on periods to gain groups of max 3 digits
+  #           parameter(s): $1 - IP-address in nn.nn.nn.nn format
+  # result in variable splitText in format "n n n .  n n . n n n . n "
+  #           Change 2014-08-15: also split the interface name.
+  #
+  splitword=`echo $* | sed 's/[^ ]*/&. /g'`
+  #echo "$splitword=$splitword"
+  splitText=`echo $splitword | sed 's/./&  /g'`
+  #echo "$splitText=$splitText"
+}
+  #
+speakText () {
+  #
+  # function: Let espeak report the interface and IP-address
+  #           parameters used:
+  #                      ifname    - name of the interface
+  #                      ipaddress - formatted as loose digits and periods
+  #
+  # Text is "interface" interface-name [followed by the IP-address]
+  speaktxt="$*"
+  #
+  # get current language
+  #
+  lang=`set | grep LANG | cut -d "=" -f 2 | cut -d '_' -f 1`
+  lang=`expr substr "$lang" 2 2`
+  #
+  if [ ${#lang} -lt 1 ] ; then
+    lang="en" # use default if not known ;
+    # TODO potential improvement: check that *this* language
+    # *is* supported by espeak??
+  fi
+  #
+  # use a slow pace to improve clarity: -s limits 80 to 450,
+  # default is 175, use 100 sounds OK
+  #
+  eOPT="-s 100 --stdout -punct=\".\""
+  espeak -v $lang $eOPT  "$speaktxt" | aplay -q
+  #
+}
+  #
+  ## main program:
+  #
+  # function: Loop through interfaces in /proc/net/dev
+  #           parameters used: none
+  #           Interface "lo" is ignored
+  #
+  for i in `cat /proc/net/dev | grep ':' | cut -d ':' -f 1`
+    do
+      ifname=`echo $i | tr -d ' ' `
+      if [ "$ifname" != "lo" ] ; then
+        reportIF "$ifname"
+      fi
+    done
+  #
+
+```
