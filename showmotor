@@ -1,0 +1,113 @@
+```
+#!/bin/bash -u
+# show motor status
+. /usr/local/bin/asciicolors
+#/sys/class/tacho-motor/tacho-motor*/port_name is the link between motor# and port
+#
+# determine which motor(port) is connected to what tacho-motor-number
+#
+curMotorPath=`/bin/ls -dC /sys/class/tacho-motor/tacho-motor*/`
+# echo "CurMotorPath=$curMotorPath"
+IFS=$' \n' read -a tachoPath <<< "$curMotorPath"
+for  i in ${!tachoPath[@]} # ! denotes the indexes
+do
+ # echo -e "process $i ${tachoPath[$i]}"
+ if [ -e ${tachoPath[$i]} ]; then
+   cd ${tachoPath[$i]}
+   # pwd
+   if [ $? -eq 0 ] ;  then
+     printf "$brwhite%s$brblue Motor on port $brwhite%s$brblue as $brwhite%s$brblue at $brwhite%s$white\n" "`date`" "`cat port_name`" "type=`cat type`" "${tachoPath[$i]} "
+     # printf "%23s \n" "== setpoints =="
+     curval=`cat duty_cycle_sp`
+     line1_1=`printf "%-21s %12d\n" "duty_cycle_sp:"          "$curval"`
+     curval=`cat pulses_per_second_sp`
+     line2_1=`printf "%-21s %12d\n"  "pulses_per_second_sp:"   "$curval"`
+     line3_1="_ ."
+     curval=`cat position_sp`
+     line4_1=`printf "%-21s %12d\n"  "position_sp:"            "$curval"`
+     curval=`cat time_sp`
+     line5_1=`printf "%-21s %12d\n"  "time_sp:"                "$curval"`
+     curval=`cat ramp_down_sp`
+     line6_1=`printf "%-21s %12d\n"  "ramp_down_sp:"           "$curval"`
+     curval=`cat ramp_up_sp`
+     line7_1=`printf "%-21s %12d\n"  "ramp_up_sp:"             "$curval"`
+     line8_1="_ ."
+     line9_1="_ ."
+     line10_1="  "
+
+     # printf "%23s     \n"  "== state     =="
+     curval=`cat duty_cycle`
+     line1_2=`printf "%-21s %12d\n"   "duty_cycle:"           "$curval"`
+     curval=`cat pulses_per_second`
+     line2_2=`printf "%-21s %12d\n"   "pulses_per_second:"    "$curval"`
+
+     curval=`cat polarity_mode`
+     line3_2=`printf "%-21s %12s\n"    "polarity_mode:"       "$curval"`
+
+     curval=`cat position`
+     line4_2=`printf "%-21s %12d\n"   "position:"             "$curval"`
+     curval=`cat position_mode`
+     line5_2=`printf "%-21s %-50s\n" "position_mode:"         "$curval"`
+     curval=`cat regulation_mode`
+     line6_2=`printf "%-21s %12s\n"   "regulation_mode:"      "$curval"`
+     curval=`cat run_mode`
+     line7_2=`printf "%-21s %12s\n"   "run_mode:"             "$curval"`
+     curval=`cat state`
+     line8_2=`printf "%-21s %s\n"  "state:"                 "$curval"`
+     curval=`cat stop_mode`
+     line9_2=`printf "%-21s %12s\n"  "stop_mode:"             "$curval"`
+     line10_2="_ ."
+
+     # printf "%23s \n" "== switches  =="
+
+     curval=`cat run`
+     line1_3=`printf "%-21s %8d\n" "run:"                     "$curval"`
+     curval=`cat estop`
+     line2_3=`printf "%-21s %8d\n"  "estop:"                  "$curval"`
+     curval=`cat speed_regulation_D`
+     line3_3=`printf "%-21s %8d\n"  "speed_regulation_D:"     "$curval"`
+     curval=`cat speed_regulation_I`
+     line4_3=`printf "%-21s %8d\n"  "speed_regulation_I:"     "$curval"`
+     curval=`cat speed_regulation_K`
+     line5_3=`printf "%-21s %8d\n"  "speed_regulation_K:"     "$curval"`
+     curval=`cat speed_regulation_P`
+     line6_3=`printf "%-21s %8d\n"  "speed_regulation_P:"     "$curval"`
+     # type  already in top of the display
+     curval=`cat uevent`
+     line7_3=`printf "%-20s %s\n" "uevent:" "$curval"`
+
+     line8_3="_ ."
+     line9_3="_ ."
+     tabc=$brblue
+     # Long string....
+     curval=`cat stop_modes`
+     line10_1=`printf "$tabc%-21s $white%s\n"   "stop_modes:"       "$curval"`
+     echo " "
+     printf "$brblue%32s %32s %32s$white\n" "  == setpoints ==  " "  == state     ==  " "  == switches  =="
+     runval=`cat run`
+     if [ "$runval" == 0 ] ; then runcol=${yellow}
+                             else runcol=${brgreen}
+     fi
+     printf "$tabc%-21s $white%8s $brblue|$white $tabc%-18s $white%11s $brblue|$white $tabc%-21s $runcol%10s\n"  $line1_1 $line1_2 $line1_3
+     printf "$tabc%-21s $white%8s $brblue|$white $tabc%-18s $white%11s $brblue|$white $tabc%-21s $white%10s\n"  $line2_1 $line2_2 $line2_3
+     printf "$tabc%-21s %8s $brblue|$white $tabc%-18s $white%11s $brblue|$white $tabc%-21s $white%10s\n"  $line3_1 $line3_2 $line3_3
+     printf "$tabc%-21s $white%8s $brblue|$white $tabc%-18s $white%11s $brblue|$white $tabc%-21s $white%10s\n"  $line4_1 $line4_2 $line4_3
+     printf "$tabc%-21s $white%8s $brblue|$white $tabc%-18s $white%11s $brblue|$white $tabc%-21s $white%10s\n"  $line5_1 $line5_2 $line5_3
+     printf "$tabc%-21s $white%8s $brblue|$white $tabc%-18s $white%11s $brblue|$white $tabc%-21s $white%10s\n"  $line6_1 $line6_2 $line6_3
+     printf "$tabc%-21s $white%8s $brblue|$white $tabc%-18s $white%11s $brblue|$white $tabc%-21s $white%10s\n"  $line7_1 $line7_2 $line7_3
+     printf "$tabc%-21s %8s $brblue|$white $tabc%-18s $runcol%11s $brblue|$white $tabc%-21s %10s\n"  $line8_1 $line8_2 $line8_3
+     printf "$tabc%-21s %8s $brblue|$white $tabc%-18s $white%11s $brblue|$white $tabc%-21s %10s\n"  $line9_1 $line9_2 $line9_3
+     #
+     echo -e $line10_1 # $line10_2 $line10_3
+     echo ""
+     # ls -ald power
+     # ls -a power/
+     # ls -ald subsystem
+     # ls -al  subsystem/
+  else
+    echo "does not exist entry $i  ${tachoPath[$i]}  "
+  fi
+ fi
+done
+
+```
