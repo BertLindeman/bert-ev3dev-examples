@@ -1,0 +1,37 @@
+```
+#!/bin/bash -u
+# determine which interface services what input port:
+#
+IFS=$' \n' read -a sensors <<< "`echo /sys/class/msensor/sensor*/`"
+#
+# printf "1  Indices: ${!sensors[@]}\n"
+# printf "2  #=aantal entries ${#sensors[@]}\n"
+# printf "3  entries @: ${sensors[@]}\n"
+# printf "4  entries *: ${sensors[*]}\n"
+#
+for  i in "${!sensors[@]}" # ! denotes the indexes
+do
+  echo -e "Process $i \"${sensors[$i]}\""
+  if [ -e "${sensors[$i]}" ]; then
+      cd "${sensors[$i]}"
+      pwd
+      echo "sensor $i type: `cat type_id` on port `cat port_name` "
+      echo "dp :                  `cat dp`"
+      echo "mode:                 `cat mode`"
+      echo "modes:                `cat modes`"
+      echo "num_values:           `cat num_values`"
+      num_values="`cat num_values`"
+      for (( v=0; v<$num_values; v++ ))
+      do
+        echo "value$v:               `cat value$v`"
+      done
+      echo "units:                `cat units`"
+      echo -e "uevent:          \n`cat uevent` \n"
+      echo " "
+  else
+      echo -e "Expected path \"${sensors[$i]}\" does not exist"
+  fi
+done
+
+
+```
