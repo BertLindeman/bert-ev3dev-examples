@@ -1,0 +1,35 @@
+```
+#!/bin/bash -ue
+# set -vx
+. /usr/local/bin/asciicolors
+#
+showmotor () {
+      if [ $motorpower -eq 0 ]; then motorcolor=$brgreen
+                                else motorcolor=$brred
+      fi
+      echo -e "$motorcolor`cat $MOTORPATH/run`$brwhite"
+      #echo -e "${motorcolor}255"
+}
+
+# for (( m=0; m<=3; m++ ))  not available in /bin/sh
+
+for m in 0 1 2 3
+  do
+    MOTORPATH="/sys/class/tacho-motor/tacho-motor$m"
+    if [ -e $MOTORPATH ]; then
+      printf "%-40s %-6s " "$MOTORPATH/run" "status"
+
+      # report status before reset
+      motorpower=`cat $MOTORPATH/run`
+      printf "$brblue %-6s $brwhite%3s " "before" "`showmotor`"
+
+      # set back to zero:
+      echo   0 > "$MOTORPATH/run"
+
+      # report status after reset
+      motorpower=`cat $MOTORPATH/run`
+      printf "$brblue %-6s $brwhite%-3s\n" "after" "`showmotor`"
+    fi
+  done
+# 
+```
