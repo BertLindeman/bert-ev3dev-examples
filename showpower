@@ -1,0 +1,33 @@
+```
+#!/bin/bash
+# IF running in cron, than environment is in $ENVIRONMENT
+echo "ENVIRONMENT=$ENVIRONMENT"
+cd /sys/devices/platform/legoev3-battery/power_supply/legoev3-battery
+pwd
+#
+devide_7 () {
+   volt=$(bc <<< "scale=7; $2/1000000")
+   printf "%20s : %11.3f\n" $1  $volt
+}
+#
+#
+printf "%20s : %11s\n" "Battery  type"  `cat type`
+printf "%20s : %11s\n" "technology"     `cat technology`
+devide_7 "  current_now"                `cat current_now`
+#
+if [ `cat present` == 1 ]; then
+  ISpresentBOOL="YES present"
+else
+  ISpresentBOOL="NO absent"
+fi
+printf   "%20s : %11s\n" "present"      "$ISpresentBOOL"
+#
+printf   "%20s : %11s\n" "scope"        `cat scope`
+printf   "%20s : %11s\n" "status"       `cat status`
+devide_7 "  voltage_max_design"         `cat voltage_max_design`
+devide_7 "  voltage_min_design"         `cat voltage_min_design`
+devide_7 "  voltage_now"                `cat voltage_now`
+# just for verification:
+echo -e "  uevent:            \n`cat uevent`" # too many lines of output
+
+```
