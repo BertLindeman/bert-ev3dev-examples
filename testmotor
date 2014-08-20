@@ -1,0 +1,60 @@
+```
+#!/bin/bash
+# set -x
+if [ "$1" == "" ]; then
+  MOTORPATH=/sys/class/tacho-motor/tacho-motor0
+else
+  MOTORPATH=/sys/class/tacho-motor/tacho-motor$1
+fi
+#
+showStateS () {
+ for (( i=1; i<=5; i++ ))
+ do
+  printf "%16s: %6d  " "$DUTY_SP_VAR" " `cat  $MOTORPATH/$DUTY_SP_VAR`"
+  printf "%10s: %10s  " "state" "`cat  $MOTORPATH/state`"
+  printf "%10s: %6d  " "position" " `cat  $MOTORPATH/position`"
+  printf "%17s: %6d\n" "pulses_per_second" " `cat  $MOTORPATH/pulses_per_second`"
+  sleep 0.2
+ done
+}
+if [ -e $MOTORPATH/ ]; then
+        DUTY_SP_VAR=duty_cycle_sp
+        echo "==== regulation_mode OFF"
+        echo   off > $MOTORPATH/regulation_mode
+        echo   0 > $MOTORPATH/$DUTY_SP_VAR
+        echo   1 > $MOTORPATH/run
+        showStateS
+        sleep 0.1
+        echo  25 > $MOTORPATH/$DUTY_SP_VAR
+        showStateS
+        sleep 0.7
+        echo  50 > $MOTORPATH/$DUTY_SP_VAR
+        showStateS
+        sleep 0.7
+        echo -50 > $MOTORPATH/$DUTY_SP_VAR
+        showStateS
+        echo "==== regulation_mode ON"
+        echo   on > $MOTORPATH/regulation_mode
+        sleep 0.2
+        showStateS
+        echo  500 > $MOTORPATH/pulses_per_second_sp
+        sleep 0.2
+        showStateS
+        echo  300 > $MOTORPATH/pulses_per_second_sp
+        sleep 0.2
+        showStateS
+        echo  100 > $MOTORPATH/pulses_per_second_sp
+        sleep 0.2
+        showStateS
+        echo -300 > $MOTORPATH/pulses_per_second_sp
+        sleep 0.2
+        showStateS
+        sleep 0.7
+        echo   0 > $MOTORPATH/run
+        sleep 0.2
+        showStateS
+else
+ echo -e "Path for motor does not exist: $MOTORPATH"
+fi
+
+```
