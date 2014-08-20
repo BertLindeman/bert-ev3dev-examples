@@ -1,0 +1,25 @@
+```
+#!/bin/bash
+# check the voltage_now and warn if the voltage is less than 7 volts
+# also set the left led to blinking amber (if possible)
+#
+cd /sys/devices/platform/legoev3-battery/power_supply/legoev3-battery
+voltage=`cat voltage_now`
+
+if [ $voltage -lt 7000000 ]; then
+   /usr/local/bin/blinkvoltage green
+elif [ $voltage -lt 6500000 ]; then
+   /usr/local/bin/blinkvoltage amber
+elif [ $voltage -lt 6000000 ]; then
+   /usr/local/bin/blinkvoltage red
+   beep
+  else
+   /usr/local/bin/blinkvoltage none
+   if [ "$ENVIRONMENT" == "" ]; then # *NOT* running in cron
+      echo -e "voltage OK: $voltage"
+      echo -e "`date +"%b %d %T"` $HOSTNAME cron: $ENVIRONMENT -  voltage OK: $voltage" >> /var/log/syslog
+   else
+      echo -e "`date +"%b %d %T"` $HOSTNAME cron: $ENVIRONMENT -  voltage OK: $voltage" >> /var/log/syslog
+   fi
+fi
+```
