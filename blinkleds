@@ -1,0 +1,35 @@
+```
+#!/bin/bash
+# deactivate first
+echo none > /sys/class/leds/ev3\:green\:right/trigger
+#
+echo 0 > /sys/class/leds/ev3\:green\:left/brightness
+echo 0 > /sys/class/leds/ev3\:green\:right/brightness
+sleep 0.1s
+COL1="green"
+COL2="red"
+for (( c=1; c<=5; c++ ))
+  do
+   echo 1 > /sys/class/leds/ev3\:$COL1\:left/brightness
+   echo 1 > /sys/class/leds/ev3\:$COL1\:right/brightness
+   sleep 0.2s
+   #
+   echo 1 > /sys/class/leds/ev3\:$COL2\:left/brightness
+   echo 1 > /sys/class/leds/ev3\:$COL2\:right/brightness
+   sleep 0.2s
+   echo 0 > /sys/class/leds/ev3\:$COL2\:left/brightness
+   echo 0 > /sys/class/leds/ev3\:$COL2\:right/brightness
+   sleep 0.2s
+   #
+   echo 0 > /sys/class/leds/ev3\:$COL1\:left/brightness
+   echo 0 > /sys/class/leds/ev3\:$COL1\:right/brightness
+   sleep 0.2s
+   echo 1 > /sys/class/leds/ev3\:$COL2\:left/brightness
+   echo 1 > /sys/class/leds/ev3\:$COL2\:right/brightness
+   sleep 0.2s
+  done
+echo 0 > /sys/class/leds/ev3\:$COL2\:left/brightness
+echo 0 > /sys/class/leds/ev3\:$COL2\:right/brightness
+#
+
+```
