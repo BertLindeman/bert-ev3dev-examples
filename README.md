@@ -1,12 +1,11 @@
 ## bert-ev3dev-examples
-
 ### Examples of bits and pieces running at Jessie level 
 
-These shell-scripts are located on my EV3-brick at /usr/local/bin
+These shell-scripts are located on my EV3-brick at `/usr/local/bin`
 but with some simple edits you can place them where **you** want them.
 
  1. Supporting script(s) used by other scripts
-    * asciicolor
+    * [asciicolor] (https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/asciicolors)
 
  2. Scripts related to managing the EV3-brick
     * checkpower
