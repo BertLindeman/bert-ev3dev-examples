@@ -1,0 +1,150 @@
+```
+#!/bin/bash
+#
+# to lowercase:
+    tosetColor="$(echo $1 | tr 'A-Z' 'a-z')"
+          side="$(echo $2 | tr 'A-Z' 'a-z')"
+          mode="$(echo $3 | tr 'A-Z' 'a-z')"
+  tosetTrigger="$(echo $4 | tr 'A-Z' 'a-z')"
+
+usageEXIT () {
+     echo "$1"
+     echo
+     echo "USAGE: $0 color [side [\"ON\"|\"OFF\" [valid MODE]]]"
+    exit 1
+}
+
+#set -v -x
+
+showLEDtrigger () {
+ # echo "showing trigger from $1"
+ for word in `cat $1` ;
+  do
+    delim=${word:0:1}${word:${#word}-1:1}
+    if [ $delim == "[]" ]; then
+      trigger=${word:1:${#word}-2}
+      # echo "current trigger now: $trigger"
+      break # do not search further
+    else
+      trigger=$word
+    fi
+  done
+  currenttrigger=$trigger
+  echo "  current trigger=$currenttrigger"
+}
+
+verifyLEDtrigger () {
+  for word in `cat $2` ;
+  do
+     delim=${word:0:1}${word:${#word}-1:1}
+     if [ $delim == "[]" ]; then
+       trigger=${word:1:${#word}-2}  # drop the first and last char: [ and ]
+     else
+       trigger=$word
+     fi
+     if [ "$1" == "$trigger" ]; then
+       : echo "  Trigger $1 is valid"
+       return 0
+     fi
+  done
+
+ # invalid trigger specified; show the valid ones:
+  echo "specified trigger \"$1\" "
+  for word in `cat $2` ;
+  do
+     delim=${word:0:1}${word:${#word}-1:1}
+     if [ $delim == "[]" ]; then
+       trigger=${word:1:${#word}-2}  # drop the first and last char: [ and ]
+     else
+       trigger=$word
+     fi
+     echo "  acceptable trigger: \"$trigger\" "
+  done
+  usageEXIT "specified trigger \"$1\" is not recognized."
+
+}
+
+ # start of mainline:
+
+ if [ $# -gt 4 ]; then
+     usageEXIT "Too many parameters; Allowed 4 Got $#: $*"
+ fi
+
+ case $mode in
+  on)
+      command="echo";  oneORzero=1
+     ;;
+  off)
+      command="echo";  oneORzero=0
+     ;;
+  "")
+      command="cat" # default
+     ;;
+  *)
+      usageEXIT "MODE should be on or off! Got \"$mode\""
+     ;;
+ esac
+
+ case $tosetColor in
+  red)
+     ;;
+  green)
+     ;;
+  "")
+      color="green" # default
+     ;;
+  *)
+      usageEXIT "COLOR should be red or green! Got \"$tosetColor\""
+     ;;
+ esac
+
+ case $side in
+  left)
+     ;;
+  right)
+     ;;
+  *)
+      usageEXIT "SIDE should be left or right! Got \"$side\""
+     ;;
+ esac
+
+ ledbase="/sys/class/leds/ev3:$tosetColor:$side"
+ ledbrightness="$ledbase/brightness"
+ ledtriggerpath="$ledbase/trigger"
+
+ if [ "$tosetTrigger" == "" ]; then
+   tosetTrigger ="none"
+ else
+   verifyLEDtrigger "$tosetTrigger" "$ledtriggerpath"
+ fi
+
+ echo "base directory $ledbase"
+
+ if [ $command == "cat" ]; then
+   echo "  brightness=`cat $ledbrightness`"
+   showLEDtrigger $ledtriggerpath
+ else
+   echo "BEFORE:"
+   echo "  brightness=`cat $ledbrightness`"
+   showLEDtrigger $ledtriggerpath
+
+   # echo "setting trigger to $tosetTrigger > $ledtriggerpath"
+   # showLEDtrigger $ledtriggerpath
+   if [ "$4" != "" ]; then
+     echo $tosetTrigger > $ledtriggerpath
+   fi
+   if [ $? -ne 0 ]; then
+     echo -e "!!!!!!!!returncode of trigger: $?"
+   fi
+   # showLEDtrigger $ledtriggerpath
+
+   echo $oneORzero > $ledbrightness
+   if [ $? -ne 0 ]; then
+     echo -e "!!!!!!!!returncode of command: $?"
+   fi
+   echo "AFTER:"
+   echo "  brightness=`cat $ledbrightness`"
+   showLEDtrigger $ledtriggerpath
+ fi
+
+```
