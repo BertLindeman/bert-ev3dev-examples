@@ -1,0 +1,21 @@
+```
+#!/bin/bash
+# Was available on Wheezy No longer available on Jessie
+#echo phy0tx    > /sys/class/leds/ev3\:green\:right/trigger
+#echo phy0rx    > /sys/class/leds/ev3\:green\:left/trigger
+#echo phy0assoc > /sys/class/leds/ev3\:red\:left/trigger
+#echo phy0radio > /sys/class/leds/ev3\:red\:right/trigger
+# set right green led to show I/O activity:
+echo mmc0  > /sys/class/leds/ev3\:green\:right/trigger
+#
+echo 1 > /sys/class/leds/ev3\:green\:right/brightness
+echo 0 > /sys/class/leds/ev3\:green\:left/brightness
+echo 0 > /sys/class/leds/ev3\:red\:right/brightness
+echo 0 > /sys/class/leds/ev3\:red\:left/brightness
+#
+cat /sys/class/leds/ev3\:green\:right/trigger
+cat /sys/class/leds/ev3\:green\:left/trigger
+cat /sys/class/leds/ev3\:red\:right/trigger
+cat /sys/class/leds/ev3\:red\:left/trigger
+## exit 0
+```
