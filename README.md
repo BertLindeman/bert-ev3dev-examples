@@ -23,7 +23,8 @@ but with some simple edits you can place them where **you** want them.
     * testmotor 
 
 ### Have your EV3 report it's IP-address by speach after boot
-For this an update is needed to `/media/mmc_p1/ev3dev.rc.local`:
+For this an update is needed to `/media/mmc_p1/ev3dev.rc.local`
+
 Add the next lines to the bottom of `/media/mmc_p1/ev3dev.rc.local`
 ```
 #
