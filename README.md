@@ -23,6 +23,19 @@ but with some simple edits you can place them where **you** want them.
     * testmotor 
 
 ### Have your EV3 report it's IP-address by speach after boot
-For this an update is needed to `/media/mmc_p1/ev3dev.rc.local` 
-and an extra script `tellIP` in the same directory
+For this an update is needed to `/media/mmc_p1/ev3dev.rc.local`:
+Add the next lines to the bottom of `/media/mmc_p1/ev3dev.rc.local`
+```
+#
+# use speach to tell the available network IP addresses
+#
+if [ -e /media/mmc_p1/tellIP ]; then
+echo "Executing /media/mmc_p1/tellIP"
+. /media/mmc_p1/tellIP
+fi
+```
+
+
+and an extra script [`tellIP`](https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/tellIP)
+in the same directory
 
