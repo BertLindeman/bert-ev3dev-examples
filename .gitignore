@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #################
 # ?? Gemfile for Yekyll?
 #################
@@ -220,3 +221,7 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+=======
+_site/
+.gitignore.bak
+>>>>>>> origin/gh-pages
