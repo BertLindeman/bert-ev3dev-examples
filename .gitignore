@@ -1,9 +1,18 @@
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/gh-pages
 #################
 # ?? Gemfile for Yekyll?
 #################
 Gemfile
 Gemfile.lock
+<<<<<<< HEAD
 _site
+=======
+_site/
+.gitignore.bak
+>>>>>>> origin/gh-pages
 #################
 ## Eclipse
 #################
@@ -219,3 +228,10 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+<<<<<<< HEAD
+=======
+=======
+_site/
+.gitignore.bak
+>>>>>>> origin/gh-pages
+>>>>>>> origin/gh-pages
