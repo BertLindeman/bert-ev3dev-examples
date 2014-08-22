@@ -1,4 +1,3 @@
-```
 #!/bin/bash
 # check the voltage_now and warn if the voltage is less than 7 volts
 # also set the left led to blinking amber (if possible)
@@ -22,4 +21,3 @@ elif [ $voltage -lt 6000000 ]; then
       echo -e "`date +"%b %d %T"` $HOSTNAME cron: $ENVIRONMENT -  voltage OK: $voltage" >> /var/log/syslog
    fi
 fi
-```
