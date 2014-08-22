@@ -5,7 +5,7 @@
 
 ### Examples of bits and pieces running at Jessie level 
 
-Scripts are available also in a zip: [bert-ev3dev-examples.zip](https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/bert-ev3dev-examples.zip)
+Scripts are **later** available also in a zip: [releases](https://github.com/BertLindeman/bert-ev3dev-examples/releases)
 
 These shell-scripts are located on my EV3-brick at `/usr/local/bin`
 but with some simple edits you can place them where **you** want them.
