@@ -1,4 +1,3 @@
-```
 #!/bin/sh -u
 #
 # Purpose: Report active IP-addresses by speach
@@ -98,5 +97,3 @@ speakText () {
       fi
     done
   #
-
-```
