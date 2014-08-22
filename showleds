@@ -1,4 +1,3 @@
-```
 #!/bin/bash
 
 usageEXIT () {
@@ -100,6 +99,3 @@ done
     done
   done
   echo -e " ${endColor} " # back to normal
-
-
-```
