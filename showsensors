@@ -1,4 +1,3 @@
-```
 #!/bin/bash -u
 # determine which interface services what input port:
 #
@@ -32,6 +31,3 @@ do
       echo -e "Expected path \"${sensors[$i]}\" does not exist"
   fi
 done
-
-
-```
