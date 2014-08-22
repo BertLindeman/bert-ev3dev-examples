@@ -1,4 +1,3 @@
-```
 #!/bin/bash
 # color codes ascii
 # Attribute codes:
@@ -30,5 +29,3 @@
   brwhite='\e[1;37m'
 
   endColor='\e[0m'
-
-```
