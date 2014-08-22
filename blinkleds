@@ -1,4 +1,3 @@
-```
 #!/bin/bash
 # deactivate first
 echo none > /sys/class/leds/ev3\:green\:right/trigger
@@ -31,5 +30,3 @@ for (( c=1; c<=5; c++ ))
 echo 0 > /sys/class/leds/ev3\:$COL2\:left/brightness
 echo 0 > /sys/class/leds/ev3\:$COL2\:right/brightness
 #
-
-```
