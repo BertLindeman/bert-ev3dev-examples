@@ -1,4 +1,3 @@
-```
 #!/bin/bash
 #
 # to lowercase:
@@ -146,5 +145,3 @@ verifyLEDtrigger () {
    echo "  brightness=`cat $ledbrightness`"
    showLEDtrigger $ledtriggerpath
  fi
-
-```
