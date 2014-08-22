@@ -1,4 +1,3 @@
-```
 #!/bin/bash
 # Was available on Wheezy No longer available on Jessie
 #echo phy0tx    > /sys/class/leds/ev3\:green\:right/trigger
@@ -18,4 +17,3 @@ cat /sys/class/leds/ev3\:green\:left/trigger
 cat /sys/class/leds/ev3\:red\:right/trigger
 cat /sys/class/leds/ev3\:red\:left/trigger
 ## exit 0
-```
