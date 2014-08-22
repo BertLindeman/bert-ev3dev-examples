@@ -1,0 +1,38 @@
+#!/bin/bash -u
+# set left led to blink amber
+# amber is made of red+green
+# very good to add this script to a crontab
+# so you get warned by a blinking led if power gets low
+
+side=left 
+
+# reset BOTH red and green leds unless we want amber
+if [ "$#" -le 0 ]; then
+ trigger="none"
+else 
+ trigger=$1
+ if [ "$1" != amber ]; then
+     ledbase="/sys/class/leds/ev3:red:$side"
+     echo 0 > $ledbase/brightness
+     echo none > $ledbase/trigger
+     ledbase="/sys/class/leds/ev3:green:$side"
+     echo 0 > $ledbase/brightness
+     echo none > $ledbase/trigger
+ fi
+fi
+ 
+if   [ "$trigger" == none  ]; then exit 0 # a good point to leave here
+elif [ "$trigger" == amber ]; then setcolor="red green"
+elif [ "$trigger" != ""    ]; then setcolor=$trigger
+else                               setcolor="red green"  
+fi    
+
+
+for ledcolor in $setcolor ;     
+do
+#    ledbase="/sys/class/leds/ev3:$ledcolor:$side"
+    echo 1     > /sys/class/leds/ev3:$ledcolor:$side/brightness
+    echo timer > /sys/class/leds/ev3:$ledcolor:$side/trigger
+done 
+
+exit 0
