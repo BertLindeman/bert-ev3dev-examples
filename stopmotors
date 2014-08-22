@@ -1,4 +1,3 @@
-```
 #!/bin/bash -ue
 # set -vx
 . /usr/local/bin/asciicolors
@@ -31,5 +30,4 @@ for m in 0 1 2 3
       printf "$brblue %-6s $brwhite%-3s\n" "after" "`showmotor`"
     fi
   done
-# 
-```
+#
