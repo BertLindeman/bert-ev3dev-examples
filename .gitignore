@@ -7,16 +7,16 @@
 #################
 Gemfile
 Gemfile.lock
+index.html
 <<<<<<< HEAD
-_site
 =======
-_site/
+_site
+_config.yml
 .gitignore.bak
 >>>>>>> origin/gh-pages
 #################
 ## Eclipse
 #################
-
 *.pydevproject
 .project
 .metadata
