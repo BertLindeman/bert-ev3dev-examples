@@ -1,6 +1,25 @@
-#!/bin/bash
+#!/bin/bash -u           
+# Script_name     : showsound
+# Author          : Bert Lindeman
+# Description     : Show info about EV3 sound
+# Version         : v1.1
+# Date            : 2014-08-26
+# Usage           : showsound
+# Notes           : o No parameters used
+#                   o Do not confuse with sound-SENSOR
+# Copyright       : 2014 Bert Lindeman
+# License         : GPL-3.0+
+#
+#============================================================================
+#
+# Changelog        
+# Date     By       Description
+# 20140826 BL       Add script header
+#
+#============================================================================
 
-  if [ -e /usr/local/bin/asciicolors ];
+
+  if [ -e /usr/local/bin/asciicolors ]; 
   then .  /usr/local/bin/asciicolors
   else    black='\e[0;30m'
     red='\e[0;31m'
@@ -23,13 +42,11 @@
     endColor='\e[0m'
   fi
 
+  cd "/sys/devices/platform/snd-legoev3/"
+  echo "Report from `pwd`"
 
-cd "/sys/devices/platform/snd-legoev3/"
-pwd
-#ls -alF
-  echo Report:
-  printf "${brblue}modalias: ${green} %-26s${white}\n" "`cat modalias`"
-  printf "${brblue}tone    : ${green} %-26s${white}\n" "`cat tone`"
-  printf "${brblue}volume  : ${green} %-26s${white}\n" "`cat volume`"
-  printf "${brblue}uevent  :\n ${green} %-26s${white}\n" "`cat uevent`"
-  echo -e " ${endColor} " # back to normal
+  printf  "${brblue}modalias: ${green} %-26s${white}\n" "`cat modalias`"
+  printf  "${brblue}tone    : ${green} %-26s${white}\n" "`cat tone`"
+  printf  "${brblue}volume  : ${green} %-26s${white}\n" "`cat volume`"
+  printf  "${brblue}uevent  :\n ${green} %-26s${white}\n" "`cat uevent`"
+  echo -e "${endColor} " # back to normal

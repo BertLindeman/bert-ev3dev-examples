@@ -1,20 +1,35 @@
-#!/bin/bash -u
+#!/bin/bash -u           
+# Script_name     : showsensors
+# Author          : Bert Lindeman
+# Description     : Show info of recognized sensors
+# Version         : v1.1
+# Date            : 2014-08-26
+# Usage           : ./showsensors
+# Notes           : 
+# Copyright       : 2014 Bert Lindeman
+# License         : GPL-3.0+
+#
+#============================================================================
+#
+# Changelog        
+# Date     By       Description
+#
+#
+#============================================================================
+
+
+#
 # determine which interface services what input port:
 #
 IFS=$' \n' read -a sensors <<< "`echo /sys/class/msensor/sensor*/`"
 #
-# printf "1  Indices: ${!sensors[@]}\n"
-# printf "2  #=aantal entries ${#sensors[@]}\n"
-# printf "3  entries @: ${sensors[@]}\n"
-# printf "4  entries *: ${sensors[*]}\n"
-#
-for  i in "${!sensors[@]}" # ! denotes the indexes
+for  i in "${!sensors[@]}" # ! walk the indexes
 do
-  echo -e "Process $i \"${sensors[$i]}\""
+  # echo -e "Process $i \"${sensors[$i]}\""
   if [ -e "${sensors[$i]}" ]; then
       cd "${sensors[$i]}"
-      pwd
-      echo "sensor $i type: `cat type_id` on port `cat port_name` "
+      echo "Process $i `pwd`" 
+      echo " sensor $i type: `cat type_id` on port `cat port_name` "
       echo "dp :                  `cat dp`"
       echo "mode:                 `cat mode`"
       echo "modes:                `cat modes`"
@@ -30,4 +45,4 @@ do
   else
       echo -e "Expected path \"${sensors[$i]}\" does not exist"
   fi
-done
+done     

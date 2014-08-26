@@ -1,38 +1,53 @@
-#!/bin/bash -u
-# set left led to blink amber
-# amber is made of red+green
-# very good to add this script to a crontab
-# so you get warned by a blinking led if power gets low
+#!/bin/bash -u           
+# Script_name     : blinkvoltage
+# Author          : Bert Lindeman
+# Description     : Set the left EV3-led according to the battery voltage
+# Version         : v1.1
+# Date            : 2014-08-26
+# Usage           : blinkvoltage [color]
+# Notes           : o color is [ none | red | green | amber ]
+#                   o very good to add this script to a crontab
+#                     so you get warned by a blinking led if power gets low
+# Copyright       : 2014 Bert Lindeman
+# License         : GPL-3.0+
+#
+#============================================================================
+#
+# Changelog        
+# Date     By       Description
+# 20140826 BL       o Add script header
+#                   o try to prevent abmber blinking flipflop red/green
+#============================================================================
 
-side=left 
 
-# reset BOTH red and green leds unless we want amber
-if [ "$#" -le 0 ]; then
- trigger="none"
-else 
- trigger=$1
- if [ "$1" != amber ]; then
-     ledbase="/sys/class/leds/ev3:red:$side"
-     echo 0 > $ledbase/brightness
-     echo none > $ledbase/trigger
-     ledbase="/sys/class/leds/ev3:green:$side"
-     echo 0 > $ledbase/brightness
-     echo none > $ledbase/trigger
- fi
-fi
+  side=left 
+
+  # reset BOTH red and green leds unless we want amber
+  if [ "$#" -le 0 ]; then
+     trigger="none"
+  else 
+     trigger=$1
+  fi
+  # first set all left colors OFF
+  ledbase="/sys/class/leds/ev3:red:$side"
+  echo 0 > $ledbase/brightness
+  echo none > $ledbase/trigger
+  ledbase="/sys/class/leds/ev3:green:$side"
+  echo 0 > $ledbase/brightness
+  echo none > $ledbase/trigger
  
-if   [ "$trigger" == none  ]; then exit 0 # a good point to leave here
-elif [ "$trigger" == amber ]; then setcolor="red green"
-elif [ "$trigger" != ""    ]; then setcolor=$trigger
-else                               setcolor="red green"  
-fi    
-
-
-for ledcolor in $setcolor ;     
-do
-#    ledbase="/sys/class/leds/ev3:$ledcolor:$side"
-    echo 1     > /sys/class/leds/ev3:$ledcolor:$side/brightness
-    echo timer > /sys/class/leds/ev3:$ledcolor:$side/trigger
-done 
+  if   [ "$trigger" == none     ]; then exit 0 # a good point to leave here
+  elif [ "$trigger" == amber    ]; then 
+      echo timer > /sys/class/leds/ev3:red:$side/trigger
+      echo timer > /sys/class/leds/ev3:green:$side/trigger
+      echo 1     > /sys/class/leds/ev3:red:$side/brightness
+      echo 1     > /sys/class/leds/ev3:green:$side/brightness
+  elif [ "$trigger" == "red"    ]; then setcolor=$trigger
+      echo timer > /sys/class/leds/ev3:$setcolor:$side/trigger
+      echo 1     > /sys/class/leds/ev3:$setcolor:$side/brightness
+  elif [ "$trigger" == "green"  ]; then setcolor=$trigger
+      echo timer > /sys/class/leds/ev3:$setcolor:$side/trigger
+      echo 1     > /sys/class/leds/ev3:$setcolor:$side/brightness
+  fi    
 
 exit 0

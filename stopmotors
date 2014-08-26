@@ -1,6 +1,33 @@
-#!/bin/bash -ue
+#!/bin/bash -ue           
+# Script_name     : stopmotors
+# Author          : Bert Lindeman
+# Description     : Stop all recognized tacho motors
+# Version         : v1.1
+# Date            : 2014-08-26
+# Usage           : stopmotors
+# Notes           : 
+# Copyright       : 2014 Bert Lindeman
+# License         : GPL-3.0+
+#
+#============================================================================
+#
+# Changelog        
+# Date     By       Description
+#
+#
+#============================================================================
+
+
+
 # set -vx
-. /usr/local/bin/asciicolors
+  if [ -e /usr/local/bin/asciicolors ];
+    then .  /usr/local/bin/asciicolors
+  else
+    brgreen=""
+    brred=""
+    brwhite=""
+    brblue=""  
+  fi
 #
 showmotor () {
       if [ $motorpower -eq 0 ]; then motorcolor=$brgreen
@@ -12,15 +39,15 @@ showmotor () {
 
 # for (( m=0; m<=3; m++ ))  not available in /bin/sh
 
-for m in 0 1 2 3
+for m in 0 1 2 3 
   do
     MOTORPATH="/sys/class/tacho-motor/tacho-motor$m"
     if [ -e $MOTORPATH ]; then
-      printf "%-40s %-6s " "$MOTORPATH/run" "status"
-
+      printf "%-40s %-6s " "$MOTORPATH/run" "status" 
+      
       # report status before reset
       motorpower=`cat $MOTORPATH/run`
-      printf "$brblue %-6s $brwhite%3s " "before" "`showmotor`"
+      printf "$brblue %-6s $brwhite%3s " "before" "`showmotor`" 
 
       # set back to zero:
       echo   0 > "$MOTORPATH/run"
@@ -30,4 +57,4 @@ for m in 0 1 2 3
       printf "$brblue %-6s $brwhite%-3s\n" "after" "`showmotor`"
     fi
   done
-#
+#  
