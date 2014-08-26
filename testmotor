@@ -1,6 +1,30 @@
-#!/bin/bash
-# set -x
-if [ "$1" == "" ]; then
+#!/bin/bash -u           
+# Script_name     : testmotor
+# Author          : Bert Lindeman
+# Description     : Fiddle a bit with a connected motor
+# Version         : v1.1
+# Date            : 2014-08-26
+# Usage           : testmotor
+# Notes           : One parameter (optional): the number of the tacho-motor
+#                   to be exercised.
+# Copyright       : 2014 Bert Lindeman
+# License         : GPL-3.0+
+#
+#============================================================================
+#
+# Changelog        
+# Date     By       Description
+# 20140826 BL       o add script header
+#                   o check for missing or too many argument(s)
+#
+#============================================================================
+
+if [ "$#" -gt 1 ]; then
+    echo "$0 ERROR: Too many parameters"
+    exit
+fi
+   
+if [ "$#" == "0" ]; then
   MOTORPATH=/sys/class/tacho-motor/tacho-motor0
 else
   MOTORPATH=/sys/class/tacho-motor/tacho-motor$1
@@ -16,9 +40,11 @@ showStateS () {
   sleep 0.2
  done
 }
+
+echo "Working with motorpath: $MOTORPATH"
 if [ -e $MOTORPATH/ ]; then
         DUTY_SP_VAR=duty_cycle_sp
-        echo "==== regulation_mode OFF"
+        echo -e "\t\t==== regulation_mode OFF"
         echo   off > $MOTORPATH/regulation_mode
         echo   0 > $MOTORPATH/$DUTY_SP_VAR
         echo   1 > $MOTORPATH/run
@@ -32,7 +58,7 @@ if [ -e $MOTORPATH/ ]; then
         sleep 0.7
         echo -50 > $MOTORPATH/$DUTY_SP_VAR
         showStateS
-        echo "==== regulation_mode ON"
+        echo -e "\t\t==== regulation_mode ON"
         echo   on > $MOTORPATH/regulation_mode
         sleep 0.2
         showStateS

@@ -1,23 +1,65 @@
-#!/bin/bash
-# check the voltage_now and warn if the voltage is less than 7 volts
-# also set the left led to blinking amber (if possible)
+#!/bin/bash -u
+# Script_name     : checkpower
+# Author          : Bert Lindeman
+# Description     : Check the battery voltage and warn if the voltage is 
+#                   less than 7 volts,
+#                   also set the left EV3 led to blinking green, amber or red.
+# Version         : v1.1
+# Date            : 2014-08-26
+# Usage           : checkpower 
+#                   No arguments needed nor used
+# Notes           : ! TOBE verified: At what voltage does the brick shutdown.
+#                     assumed 6 volts would be acceptable.
+#                   o power (using an EV3 rechargable battery) usualy drops 0.1 V
+#                     in about half an hour. So IF this script is run as cron task
+#                     running it each 10 minutes should be sufficient.
+# Copyright       : 2014 Bert Lindeman
+# License         : GPL-3.0+
 #
-cd /sys/devices/platform/legoev3-battery/power_supply/legoev3-battery
-voltage=`cat voltage_now`
+#============================================================================
+#
+# Changelog       :
+# Date     By       Description
+# 20140826 BL       o Add header
+#                   o Do not ALWAYS state that power is "OK"
+#                     but show the status WARN / MED / LOW / OK
+#                   o whole algorithm did NOT work :-(
+#                   o Check if ENVIRONMENT variable is set.
+#============================================================================
 
-if [ $voltage -lt 7000000 ]; then
-   /usr/local/bin/blinkvoltage green
-elif [ $voltage -lt 6500000 ]; then
-   /usr/local/bin/blinkvoltage amber
-elif [ $voltage -lt 6000000 ]; then
-   /usr/local/bin/blinkvoltage red
-   beep
-  else
-   /usr/local/bin/blinkvoltage none
-   if [ "$ENVIRONMENT" == "" ]; then # *NOT* running in cron
-      echo -e "voltage OK: $voltage"
-      echo -e "`date +"%b %d %T"` $HOSTNAME cron: $ENVIRONMENT -  voltage OK: $voltage" >> /var/log/syslog
+
+
+   status=UNKWN  # set default
+   
+   cd /sys/devices/platform/legoev3-battery/power_supply/legoev3-battery
+   voltage=`cat voltage_now`
+   # voltage is in microvolt as documented in include/linux/power_supply.h
+   # Did not take the trouble to format this.
+
+   
+   if   [ $voltage -lt 6000000 ]; then 
+        /usr/local/bin/blinkvoltage red  
+        beep
+        status=LOW
+        # issue a warning; if setup cron can email messages like this.
+        echo -e "WARNING: voltage $status: $voltage"
+   elif [ $voltage -lt 6500000 ]; then 
+        /usr/local/bin/blinkvoltage amber  
+        status=MED
+        echo -e "WARNING: voltage $status: $voltage"
+   elif [ $voltage -lt 7000000 ]; then 
+        /usr/local/bin/blinkvoltage green
+        status=WARN  
    else
-      echo -e "`date +"%b %d %T"` $HOSTNAME cron: $ENVIRONMENT -  voltage OK: $voltage" >> /var/log/syslog
-   fi
-fi
+        /usr/local/bin/blinkvoltage none
+        status=OK
+   fi  
+
+   # Assign "non-cron" if ENVIRONMENT is unset or null, and thus prevent error "variable unbound":
+   : "${ENVIRONMENT:=non-cron}"
+   
+   if [ "$ENVIRONMENT" == "non-cron" ]; then # just a message; no need to add to syslog 
+      echo -e "voltage $status: $voltage"
+   else
+      echo -e "`date +"%b %d %T"` $HOSTNAME cron: $ENVIRONMENT -  voltage $status: $voltage" >> /var/log/syslog
+   fi   

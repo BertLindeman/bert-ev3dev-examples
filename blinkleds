@@ -1,5 +1,26 @@
-#!/bin/bash
-# deactivate first
+#!/bin/bash -u           
+# Script_name     : blinkleds
+# Author          : Bert Lindeman
+# Description     : Have the EV3-leds blink red amber and green
+# Version         : v1.1
+# Date            : 2014-08-26
+# Usage           : blinkleds
+# Notes           : No parameters used
+# Copyright       : 2014 Bert Lindeman
+# License         : GPL-3.0+
+#
+#============================================================================
+#
+# Changelog        
+# Date     By       Description
+# 20140826 BL       o Added script header
+#                   o Show in the terminal what is being done.
+#
+#============================================================================
+
+
+
+echo "   deactivate first"
 echo none > /sys/class/leds/ev3\:green\:right/trigger
 #
 echo 0 > /sys/class/leds/ev3\:green\:left/brightness
@@ -9,24 +30,31 @@ COL1="green"
 COL2="red"
 for (( c=1; c<=5; c++ ))
   do
+   echo "send 1 to brightness of $COL1 led; left and right"
    echo 1 > /sys/class/leds/ev3\:$COL1\:left/brightness
    echo 1 > /sys/class/leds/ev3\:$COL1\:right/brightness
    sleep 0.2s
    #
+   echo "send 1 to brightness of $COL2 led; left and right"
    echo 1 > /sys/class/leds/ev3\:$COL2\:left/brightness
    echo 1 > /sys/class/leds/ev3\:$COL2\:right/brightness
    sleep 0.2s
+   echo "send 0 to brightness of $COL2 led; left and right"
    echo 0 > /sys/class/leds/ev3\:$COL2\:left/brightness
    echo 0 > /sys/class/leds/ev3\:$COL2\:right/brightness
    sleep 0.2s
    #
+   echo "send 0 to brightness of $COL2 led; left and right"
    echo 0 > /sys/class/leds/ev3\:$COL1\:left/brightness
    echo 0 > /sys/class/leds/ev3\:$COL1\:right/brightness
    sleep 0.2s
+   echo "send 1 to brightness of $COL2 led; left and right"
    echo 1 > /sys/class/leds/ev3\:$COL2\:left/brightness
    echo 1 > /sys/class/leds/ev3\:$COL2\:right/brightness
    sleep 0.2s
   done
+echo "deativate again"  
+   echo "send 0 to brightness of $COL2 led; left and right"
 echo 0 > /sys/class/leds/ev3\:$COL2\:left/brightness
 echo 0 > /sys/class/leds/ev3\:$COL2\:right/brightness
 #

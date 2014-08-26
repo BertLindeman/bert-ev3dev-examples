@@ -1,13 +1,38 @@
-#!/bin/bash
+#!/bin/bash -u           
+# Script_name     : showleds
+# Author          : Bert Lindeman
+# Description     : Show values of EV3-leds
+# Version         : v1.1  
+# Date            : 2014-08-26
+# Usage           : ./showleds
+# Notes           : No arguments needed or used       
+#                   o brightness is only non-zero at the time
+#                     that the led indeed *is* giving light.
+#                     So a blinking led might show zero or non-zero.
+# Copyright       : 2014 Bert Lindeman
+# License         : GPL-3.0+
+#
+#============================================================================
+#
+# Changelog       :       
+# Date     By       Description
+# 20140826 BL       o Show delay_on and delay_off if available for 
+#                     this led and for it's trigger
+#                   o adapt usage clause (not parameters)
+#
+#============================================================================
+
+
+#
 
 usageEXIT () {
     echo "$1"
     echo
-    echo "USAGE: $0 color [side [\"ON\"|\"OFF\" [valid MODE]]]"
+    echo "USAGE: $0 "
     exit 1
 }
 
-  if [ -e /usr/local/bin/asciicolors ];
+  if [ -e /usr/local/bin/asciicolors ]; 
   then .  /usr/local/bin/asciicolors
   else    black='\e[0;30m'
     red='\e[0;31m'
@@ -33,6 +58,8 @@ usageEXIT () {
 declare _A brightnessArr
 declare _A triggerArr
 declare _A triggerCol
+declare _A delayON
+declare _A delayOFF
 
 showLEDtrigger () {
  # echo "showing trigger from $1"
@@ -43,24 +70,26 @@ showLEDtrigger () {
       trigger=${word:1:${#word}-2}
       break # do not search further
     else
-      trigger=$word
+      trigger=$word  
     fi
   done
-  currenttrigger=$trigger
-  if [ $currenttrigger == "none" ]; then triggercol=$gray
+  currenttrigger=$trigger 
+  if [ $currenttrigger == "none" ]; then triggercol=$white
                                     else triggercol=$brblue
-  fi
+  fi                                   
 }
 
 for side in left right ;
 do
-  for ledcolor in red green ;
+  for ledcolor in red green ; 
   do
-    if [ $ledcolor == "red"  ]; then icol=0  ; else icol=1 ;  fi
-    if [ $side  == "left" ]; then iside=0 ; else iside=1;  fi
-
+    if [ $ledcolor == "red"  ]; then icol=0  ; else icol=1 ;  fi      
+    if [ $side  == "left" ]; then iside=0 ; else iside=1;  fi      
+     
     ledbase="/sys/class/leds/ev3:$ledcolor:$side"
     ledbrightness="$ledbase/brightness"
+    delay_onpath="$ledbase/delay_on"
+    delay_offpath="$ledbase/delay_off"
     ledtriggerpath="$ledbase/trigger"
 
     brightness=$(echo "`cat $ledbrightness`")
@@ -68,34 +97,40 @@ do
     showLEDtrigger $ledtriggerpath
     triggerArr[$icol$iside]=${currenttrigger:0:40}
     triggerCol[$icol$iside]=$triggercol # ${triggercol}
-  done
-done
+    if [ -e "$delay_onpath" ];  then  delayON[$icol$iside]=$(echo "`cat $delay_onpath`")
+    else                              delayON[$icol$iside]="."
+    fi
+    if [ -e "$delay_offpath" ]; then delayOFF[$icol$iside]=$(echo "`cat $delay_offpath`")
+    else                             delayOFF[$icol$iside]="."
+    fi
+  done  
+done 
 
 # clear
 
   echo Report:
   # header
-  printf "$brwhite%-6s %-11s %10s %-40s$white\n" "color" "Side" "Brightness" "trigger"
-  printf "$brwhite%-6s %-11s %10s %-40s$white\n" "-----" "-----------" "----------" "-------"
+  printf "$brwhite%-6s %-11s %10s %8s %8s %-40s$white\n" "color" "Side"        "Brightness" " dly_ON" "dly_OFF" "trigger"
+  printf "$brwhite%-6s %-11s %10s %8s %8s %-40s$white\n" "-----" "-----------" "----------" " ------" "-------" "-------"
 
   for side in left right ;
-  do
+  do  
     for ledcolor in red green ;
-    do
-      if [ $ledcolor == "red"  ]; then icol=0  ; else icol=1 ;  fi
-      if [ $side     == "left" ]; then iside=0 ; else iside=1;  fi
+    do      
+      if [ $ledcolor == "red"  ]; then icol=0  ; else icol=1 ;  fi      
+      if [ $side     == "left" ]; then iside=0 ; else iside=1;  fi      
 
       curColor=\$br$ledcolor # dereference $ledcolor to get bright colorcode for ledcolor
-
+      
       if [ "$side" == "right" ] ; then
         curside="right"; sidealign=""
-      else
+      else  
         curside="left" ; sidealign="-"
       fi
       if [ ${brightnessArr[$icol$iside]} == "0" ]; then brightnessCol=$yellow
                                                    else brightnessCol=$green
       fi
-      printf `eval echo $curColor`"%-6s $white%$sidealign""11s %10s ${triggerCol[$icol$iside]} %-40s\n" $ledcolor $curside ${brightnessArr[$icol$iside]} ${triggerArr[$icol$iside]}
+      printf `eval echo $curColor`"%-6s $white%$sidealign""11s %10s %8s %8s ${triggerCol[$icol$iside]}%-40s\n" $ledcolor $curside ${brightnessArr[$icol$iside]} ${delayON[$icol$iside]} ${delayOFF[$icol$iside]} ${triggerArr[$icol$iside]} 
     done
-  done
+  done 
   echo -e " ${endColor} " # back to normal
