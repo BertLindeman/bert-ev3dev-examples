@@ -1,10 +1,38 @@
-#!/bin/bash
+#!/bin/bash -u           
+# Script_name     : setled
+# Author          : Bert Lindeman
+# Description     : Set an EV3-led
+# Version         : v1.1
+# Date            : 2014-08-26
+# Usage           : ./setled
+# Notes           : 4 optional parameters:
+#                   color [side [ON | OFF [valid MODE]]] 
+# Copyright       : 2014 Bert Lindeman
+# License         : GPL-3.0+
 #
-# to lowercase:
-    tosetColor="$(echo $1 | tr 'A-Z' 'a-z')"
-          side="$(echo $2 | tr 'A-Z' 'a-z')"
-          mode="$(echo $3 | tr 'A-Z' 'a-z')"
-  tosetTrigger="$(echo $4 | tr 'A-Z' 'a-z')"
+#============================================================================
+#
+# Changelog        
+# Date     By       Description
+# 20140826 BL       add script header
+#
+#============================================================================
+
+
+
+#
+#  get parameters and translate to lowercase:
+#
+   # set default if parameter has not been specified: 
+   if [ "$#" -lt 1 ]; then  : ${p1:=green}; else p1=$1; fi
+   if [ "$#" -lt 2 ]; then  : ${p2:=left} ; else p2=$2; fi 
+   if [ "$#" -lt 3 ]; then  : ${p3:=on}   ; else p3=$3; fi
+   if [ "$#" -lt 4 ]; then  : ${p4:=none} ; else p4=$4; fi
+   
+    tosetColor="$(echo $p1 | tr 'A-Z' 'a-z')"
+          side="$(echo $p2 | tr 'A-Z' 'a-z')"
+          mode="$(echo $p3 | tr 'A-Z' 'a-z')"
+  tosetTrigger="$(echo $p4 | tr 'A-Z' 'a-z')"
 
 usageEXIT () {
      echo "$1"
@@ -25,11 +53,11 @@ showLEDtrigger () {
       # echo "current trigger now: $trigger"
       break # do not search further
     else
-      trigger=$word
+      trigger=$word  
     fi
   done
   currenttrigger=$trigger
-  echo "  current trigger=$currenttrigger"
+  echo "  current trigger=$currenttrigger" 
 }
 
 verifyLEDtrigger () {
@@ -39,14 +67,14 @@ verifyLEDtrigger () {
      if [ $delim == "[]" ]; then
        trigger=${word:1:${#word}-2}  # drop the first and last char: [ and ]
      else
-       trigger=$word
+       trigger=$word  
      fi
      if [ "$1" == "$trigger" ]; then
        : echo "  Trigger $1 is valid"
        return 0
      fi
   done
-
+ 
  # invalid trigger specified; show the valid ones:
   echo "specified trigger \"$1\" "
   for word in `cat $2` ;
@@ -55,17 +83,17 @@ verifyLEDtrigger () {
      if [ $delim == "[]" ]; then
        trigger=${word:1:${#word}-2}  # drop the first and last char: [ and ]
      else
-       trigger=$word
+       trigger=$word  
      fi
      echo "  acceptable trigger: \"$trigger\" "
   done
   usageEXIT "specified trigger \"$1\" is not recognized."
-
+ 
 }
 
  # start of mainline:
-
- if [ $# -gt 4 ]; then
+ 
+ if [ "$#" -gt "4" ]; then
      usageEXIT "Too many parameters; Allowed 4 Got $#: $*"
  fi
 
@@ -74,11 +102,11 @@ verifyLEDtrigger () {
       command="echo";  oneORzero=1
      ;;
   off)
-      command="echo";  oneORzero=0
+      command="echo";  oneORzero=0 
      ;;
   "")
       command="cat" # default
-     ;;
+     ;;   
   *)
       usageEXIT "MODE should be on or off! Got \"$mode\""
      ;;
@@ -91,7 +119,7 @@ verifyLEDtrigger () {
      ;;
   "")
       color="green" # default
-     ;;
+     ;;   
   *)
       usageEXIT "COLOR should be red or green! Got \"$tosetColor\""
      ;;
@@ -110,15 +138,15 @@ verifyLEDtrigger () {
  ledbase="/sys/class/leds/ev3:$tosetColor:$side"
  ledbrightness="$ledbase/brightness"
  ledtriggerpath="$ledbase/trigger"
-
+ 
  if [ "$tosetTrigger" == "" ]; then
    tosetTrigger ="none"
- else
+ else  
    verifyLEDtrigger "$tosetTrigger" "$ledtriggerpath"
  fi
-
+ 
  echo "base directory $ledbase"
-
+ 
  if [ $command == "cat" ]; then
    echo "  brightness=`cat $ledbrightness`"
    showLEDtrigger $ledtriggerpath
@@ -126,22 +154,22 @@ verifyLEDtrigger () {
    echo "BEFORE:"
    echo "  brightness=`cat $ledbrightness`"
    showLEDtrigger $ledtriggerpath
-
+   
    # echo "setting trigger to $tosetTrigger > $ledtriggerpath"
    # showLEDtrigger $ledtriggerpath
-   if [ "$4" != "" ]; then
-     echo $tosetTrigger > $ledtriggerpath
-   fi
-   if [ $? -ne 0 ]; then
-     echo -e "!!!!!!!!returncode of trigger: $?"
-   fi
-   # showLEDtrigger $ledtriggerpath
-
-   echo $oneORzero > $ledbrightness
+   if [ "$p4" != "" ]; then
+     echo $tosetTrigger > $ledtriggerpath 
+     if [ $? -ne 0 ]; then
+       echo -e "!!!!!!!!returncode of trigger: $?"
+     fi
+   fi  
+   # showLEDtrigger $ledtriggerpath  
+   
+   echo $oneORzero > $ledbrightness 
    if [ $? -ne 0 ]; then
      echo -e "!!!!!!!!returncode of command: $?"
-   fi
+   fi  
    echo "AFTER:"
    echo "  brightness=`cat $ledbrightness`"
    showLEDtrigger $ledtriggerpath
- fi
+ fi    

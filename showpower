@@ -1,34 +1,50 @@
-#!/bin/bash
-# IF running in cron, than environment is in $ENVIRONMENT
+#!/bin/bash -u           
+# Script_name     : showpower
+# Author          : Bert Lindeman
+# Description     : Show variables related to EV3 battery
+# Version         : v1.1
+# Date            : 2014-08-26
+# Usage           : showpower
+# Notes           : The field "status" has a fixed value "Discharging" 
+#                   this is by kernel design.
+# Copyright       : 2014 Bert Lindeman
+# License         : GPL-3.0+
 #
-# The field "status" has a fixed value "Discharging" by kernel design
+#============================================================================
 #
+# Changelog        
+# Date     By       Description
+# 20140826 BL       0 add script header
+#                   0 made a bit more robust
 #
-echo "ENVIRONMENT=$ENVIRONMENT"
-cd /sys/devices/platform/legoev3-battery/power_supply/legoev3-battery
-pwd
-#
-devide_7 () {
+#============================================================================
+
+
+devide_1000000 () {
    volt=$(bc <<< "scale=7; $2/1000000")
    printf "%20s : %11.3f\n" $1  $volt 
 }
-#
-#
-printf "%20s : %11s\n" "Battery  type"  `cat type`
-printf "%20s : %11s\n" "technology"     `cat technology` 
-devide_7 "  current_now"                `cat current_now`
-#
-if [ `cat present` == 1 ]; then
-  ISpresentBOOL="YES present"
-else  
-  ISpresentBOOL="NO absent"
-fi
-printf   "%20s : %11s\n" "present"      "$ISpresentBOOL"
-#
-printf   "%20s : %11s\n" "scope"        `cat scope`
-printf   "%20s : %11s %s\n" "status"    `cat status` "(fake value)"
-devide_7 "  voltage_max_design"         `cat voltage_max_design`
-devide_7 "  voltage_min_design"         `cat voltage_min_design`
-devide_7 "  voltage_now"                `cat voltage_now`
-# just for verification:
-echo -e "  uevent:            \n`cat uevent`" # too many lines of output
+
+    #
+    cd /sys/devices/platform/legoev3-battery/power_supply/legoev3-battery
+    echo "printing info from `pwd`"
+    #
+    #
+    printf "%20s : %11s\n" "Battery  type"  `cat type`
+    printf "%20s : %11s\n" "technology"     `cat technology` 
+    devide_1000000 "  current_now"                `cat current_now`
+    #
+    if [ `cat present` == 1 ]; then
+      ISpresentBOOL="YES present"
+    else  
+      ISpresentBOOL="NO absent"
+    fi
+    printf   "%20s : %11s\n" "present"      "$ISpresentBOOL"
+    #
+    printf   "%20s : %11s\n" "scope"        `cat scope`
+    printf   "%20s : %11s %s\n" "status"    `cat status` "(fake value)"
+    devide_1000000 "  voltage_max_design"         `cat voltage_max_design`
+    devide_1000000 "  voltage_min_design"         `cat voltage_min_design`
+    devide_1000000 "  voltage_now"                `cat voltage_now`
+    # just for verification:
+    echo -e "  uevent:            \n`cat uevent`" # too many lines of output

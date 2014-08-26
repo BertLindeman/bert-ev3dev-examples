@@ -1,13 +1,33 @@
-#!/bin/bash -u
+#!/bin/bash -u           
+# Script_name     : showmotor
+# Author          : Bert Lindeman
+# Description     : Show status of connected motors
+# Version         : v1.1
+# Date            : 2014-08-26
+# Usage           : showmotor
+# Notes           : Only tested with LEGO EV3 and NXT motors
+# Copyright       : 2014 Bert Lindeman
+# License         : GPL-3.0+
+#
+#============================================================================
+#
+# Changelog        
+# Date     By       Description
+# 20140826 BL       Add script header
+#
+#============================================================================
+
+
+
 # show motor status
 . /usr/local/bin/asciicolors
-# /sys/class/tacho-motor/tacho-motor*/port_name is the link between motor# and port
 #
 # determine which motor(port) is connected to what tacho-motor-number  
+#   /sys/class/tacho-motor/tacho-motor*/port_name is the link between motor# and port
 #
 IFS=$' \n' read -a tachoPath <<< "`echo /sys/class/tacho-motor/tacho-motor*/`"
 #
-for  i in ${!tachoPath[@]} # ! denotes the indexes
+for  i in ${!tachoPath[@]} # ! walk the indexes
 do
   #echo -e "process $i ${tachoPath[$i]}"
  if [ -e ${tachoPath[$i]} ]; then
@@ -19,15 +39,20 @@ do
 
      curval=`cat duty_cycle_sp`
      line1_1=`printf "%-21s %12d\n"  "duty_cycle_sp:"        "$curval"`
+
      curval=`cat pulses_per_second_sp`
      line2_1=`printf "%-21s %12d\n"  "pulses_per_second_sp:" "$curval"`
      line3_1="_ ."     
+
      curval=`cat position_sp`
      line4_1=`printf "%-21s %12d\n"  "position_sp:"          "$curval"`
+
      curval=`cat time_sp`
      line5_1=`printf "%-21s %12d\n"  "time_sp:"              "$curval"`
+
      curval=`cat ramp_down_sp`
      line6_1=`printf "%-21s %12d\n"  "ramp_down_sp:"         "$curval"`
+
      curval=`cat ramp_up_sp`
      line7_1=`printf "%-21s %12d\n"  "ramp_up_sp:"           "$curval"`
      line8_1="_ ."          
@@ -36,6 +61,7 @@ do
      
      curval=`cat duty_cycle`
      line1_2=`printf "%-21s %12d\n"  "duty_cycle:"           "$curval"`
+
      curval=`cat pulses_per_second`
      line2_2=`printf "%-21s %12d\n"  "pulses_per_second:"    "$curval"`
      
@@ -44,28 +70,38 @@ do
      
      curval=`cat position`
      line4_2=`printf "%-21s %12d\n"  "position:"             "$curval"`
+
      curval=`cat position_mode`
      line5_2=`printf "%-21s %-50s\n" "position_mode:"        "$curval"`
+
      curval=`cat regulation_mode`
      line6_2=`printf "%-21s %12s\n"  "regulation_mode:"      "$curval"`
+
      curval=`cat run_mode`
      line7_2=`printf "%-21s %12s\n"  "run_mode:"             "$curval"`
+
      curval=`cat state`
      line8_2=`printf "%-21s %s\n"    "state:"                "$curval"`
+
      curval=`cat stop_mode`
      line9_2=`printf "%-21s %12s\n"  "stop_mode:"            "$curval"`
      line10_2="_ ."     
      
      curval=`cat run`
      line1_3=`printf "%-21s %8d\n"   "run:"                  "$curval"`
+
      curval=`cat estop`
      line2_3=`printf "%-21s %8d\n"   "estop:"                "$curval"`
+
      curval=`cat speed_regulation_D`
      line3_3=`printf "%-21s %8d\n"   "speed_regulation_D:"   "$curval"`
+
      curval=`cat speed_regulation_I`
      line4_3=`printf "%-21s %8d\n"   "speed_regulation_I:"   "$curval"`
+
      curval=`cat speed_regulation_K`
      line5_3=`printf "%-21s %8d\n"   "speed_regulation_K:"   "$curval"`
+
      curval=`cat speed_regulation_P`
      line6_3=`printf "%-21s %8d\n"   "speed_regulation_P:"   "$curval"`
      # type  already in top of the display
@@ -94,7 +130,7 @@ do
      printf "$tabc%-21s %8s $brwhite|$white $tabc%-18s $runcol%11s $brwhite|$white $tabc%-21s %10s\n"  $line8_1 $line8_2 $line8_3 
      printf "$tabc%-21s %8s $brwhite|$white $tabc%-18s $white%11s $brwhite|$white $tabc%-21s %10s\n"  $line9_1 $line9_2 $line9_3 
      #
-     echo -e $line10_1 # $line10_2 $line10_3 
+     echo -e $line10_1 # 10_2 and 10_3 not used. 
      echo ""
 
   else
