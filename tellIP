@@ -1,99 +1,152 @@
 #!/bin/sh -u
+# Script_name     : tellip
+# Author          : Bert Lindeman
+# Description     : Report active IP-addresses by speach
+#                   This script is meant to be run in the boot sequence
+# Version         : v1.1
+# Date            : 2014-08-11
+# Usage           : tellip
+#                   Tell (speak) what IP address(es) this brick has.
+#                   So you can hear the IP address 
+#                   in stead of pinging to find it.
+# Notes           : Tested upon ev3dev running jessie
+#                   Because this script is meant to run as init script,
+#                   using /bin/sh and not bash builtin functions
 #
-# Purpose: Report active IP-addresses by speach
-#          This script is meant to be run in the boot sequence
-# Environment: Tested upon ev3dev running jessie
-#          It runs Debian jessie at 3.14.7-2-ev3dev-pre1
+# Copyright       : 2014 Bert Lindeman
+# License         : GPL-3.0+
 #
-# Because this script is meant to run as init script,
-# I used /bin/sh and did not use bash builtin's
+#============================================================================
 #
-# ------------------------------------------------------------------
-# Author:                         Bert Lindeman
-# Changes:  2014-08-11            Initial version
-# ------------------------------------------------------------------
-# Tell (speak) what IP address(es) this brick has.
-# So you can hear the IP address in stead of pinging to find it.
+# Changelog        
+# Date     By       Description
+# 20140828 BL       It takes more time to complete wifi setup,
+#                   So do a few attempts and wait before giving up.
+#
+#============================================================================
+
+
+ 
+#============================================================================
+# function: report ip address for THIS interface 
+#           parameter(s): $1 - interface-id like usb0 or wlan0
+#
+#============================================================================
 #
 reportIF () {
+  # 
+  IP=""       # start empty
+  loopcount=0 # counter at zero
   #
-  # function: report ip address for this interface
-  #           parameter(s): $1 - interface-id like usb0 or wlan0
+  # Get IP-address 
+  # do while $IP is empty, but max 15 times..
   #
-  extractIP $1
+  while [ ".$IP" = "." ]
+  do
+    loopcount=$((loopcount+1))
+    extractIP $1
+    if [ $loopcount -ge 15 ] ; then
+        break;
+    elif [ "$IP" = "" ]; then
+        waittext="\"waiting 30 seconds\""
+        echo "Got no IP-address yet for $ifname, attempt# $loopcount, $waittext" 
+        espeak "$waittext" --stdout | aplay -q
+        sleep 30
+    fi
+  done
+  #
   echo "$0: Report for interface: \"$1\": $IP"
-  # the interface name is pronounced better if UPCASED and split by periods:
+  #
+  # the interface name is pronounced more clear if UPCASED and split by periods
+  # The same goes for the IP-address
+  # 
   IFNAME=`echo $ifname | tr '[:lower:]' '[:upper:]' | sed 's/./&./g'`
+  #  echo  "about to report $IP for $IFNAME" 
   splitText " $IFNAME $IP"
-  speakText " Interface.  $splitText"
+  #  echo  "about to speaktext:\"  interface.  $splitText\"" 
+  speakText "  Interface.  $splitText" 
 }
-  #
-  # get the ip address from this interface:
-  #
+
+ 
+
+#============================================================================
+# function: Determine IP address for THIS interface 
+#           parameter(s): $1 - interface-id like usb0 or wlan0
+# 
+#============================================================================
+#
 extractIP () {
-  #
-  # function: Determine IP address for THIS interface
-  #           parameter(s): $1 - interface-id like usb0 or wlan0
-  #
+#
   ifcmd="/sbin/ifconfig"
   cutcmd="cut -d ":" -f2"
   IP=`echo \`$ifcmd $1 | grep 'inet addr:'|$cutcmd|awk '{ print$1}'\``
-  # echo "Result of extractIP: $IP"
+#
 }
-  #
+
+
+#============================================================================ 
+# function: split IP-address on periods to gain groups of max 3 digits
+#           parameter(s): $1 - IP-address in nn.nn.nn.nn format
+# result:   variable splitText in format "n n n .  n n . n n n . n "
+#============================================================================
+#
 splitText () {
-  #
-  # function: split IP-address on periods to gain groups of max 3 digits
-  #           parameter(s): $1 - IP-address in nn.nn.nn.nn format
-  # result in variable splitText in format "n n n .  n n . n n n . n "
-  #           Change 2014-08-15: also split the interface name.
-  #
   splitword=`echo $* | sed 's/[^ ]*/&. /g'`
-  #echo "$splitword=$splitword"
   splitText=`echo $splitword | sed 's/./&  /g'`
-  #echo "$splitText=$splitText"
 }
-  #
+ 
+
+#============================================================================
+# function: Let espeak report the interface and IP-address
+#           parameters used:
+#                      ifname    - name of the interface
+#                      ipaddress - formatted as loose digits and periods 
+
+#============================================================================
 speakText () {
   #
-  # function: Let espeak report the interface and IP-address
-  #           parameters used:
-  #                      ifname    - name of the interface
-  #                      ipaddress - formatted as loose digits and periods
   #
-  # Text is "interface" interface-name [followed by the IP-address]
+  # Text is: "interface" interface-name [followed by the IP-address]
   speaktxt="$*"
   #
   # get current language
+  #  
+  lang=`expr substr "$LANG" 1 2`
+  if [ ${#lang} -ne 2 ] ; then
+    lang="en" # use default if not known ; 
+  fi  
+  # TODO potential improvement: check that *this* language 
+  # indeed *is* supported by espeak??
+
+  # use a slow pace to improve clarity:
+  # -s limits 80 to 450,
+  #    default is 175
+  #    175 is too fast; using 100
   #
-  lang=`set | grep LANG | cut -d "=" -f 2 | cut -d '_' -f 1`
-  lang=`expr substr "$lang" 2 2`
-  #
-  if [ ${#lang} -lt 1 ] ; then
-    lang="en" # use default if not known ;
-    # TODO potential improvement: check that *this* language
-    # *is* supported by espeak??
-  fi
-  #
-  # use a slow pace to improve clarity: -s limits 80 to 450,
-  # default is 175, use 100 sounds OK
-  #
-  eOPT="-s 100 --stdout -punct=\".\""
-  espeak -v $lang $eOPT  "$speaktxt" | aplay -q
-  #
+  # -a Amplitude, 0 to 200, default is 100
+  #    (similar to volume of the sound)
+  eOPT="-a 40 -s 100 --stdout -punct=\".\""
+  basenm=`basename "$0"`
+  # echo "about to: \"espeak -v $lang $eOPT \"$speaktxt\" | aplay -q\""
+  espeak -v $lang $eOPT  "$speaktxt" | aplay -q  
 }
-  #
-  ## main program:
-  #
-  # function: Loop through interfaces in /proc/net/dev
-  #           parameters used: none
-  #           Interface "lo" is ignored
-  #
+
+
+
+#============================================================================ 
+#
+## main program:
+#
+# function: Loop through interfaces in /proc/net/dev
+#           parameters used: none
+#           Interface "lo" is ignored  
+#============================================================================
+#
   for i in `cat /proc/net/dev | grep ':' | cut -d ':' -f 1`
     do
       ifname=`echo $i | tr -d ' ' `
       if [ "$ifname" != "lo" ] ; then
         reportIF "$ifname"
-      fi
+      fi  
     done
-  #
+#
