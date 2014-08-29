@@ -25,8 +25,11 @@
 #                     but show the status WARN / MED / LOW / OK
 #                   o whole algorithm did NOT work :-(
 #                   o Check if ENVIRONMENT variable is set.
+# 20140827 BL       o 6 volts is just a bit too low as last warning level
+#                     Last drop of voltage e.g. was too much
+#                     from 6303066 to 5668733 in 10 minutes (my check interval)
+#                     Causing auto? shutdown.
 #============================================================================
-
 
 
    status=UNKWN  # set default
@@ -37,11 +40,11 @@
    # Did not take the trouble to format this.
 
    
-   if   [ $voltage -lt 6000000 ]; then 
+   if   [ $voltage -lt 6100000 ]; then 
         /usr/local/bin/blinkvoltage red  
         beep
         status=LOW
-        # issue a warning; if setup cron can email messages like this.
+        # issue a warning; if setup, then cron can email messages like this.
         echo -e "WARNING: voltage $status: $voltage"
    elif [ $voltage -lt 6500000 ]; then 
         /usr/local/bin/blinkvoltage amber  
