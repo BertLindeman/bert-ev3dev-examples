@@ -238,3 +238,7 @@ _site/
 TODO.txt
 perldoc
 *.prev.*
+*.old
+*.crlf
+calc_ntp_good
+*_v1.1
