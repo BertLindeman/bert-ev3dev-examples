@@ -2,7 +2,7 @@
 # Script_name     : setled
 # Author          : Bert Lindeman
 # Description     : Set an EV3-led
-# Version         : v1.1
+# Version         : v1.2
 # Date            : 2014-08-26
 # Usage           : setled
 # Notes           : 4 optional parameters:

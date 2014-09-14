@@ -2,7 +2,7 @@
 # Script_name     : showpower
 # Author          : Bert Lindeman
 # Description     : Show variables related to EV3 battery
-# Version         : v1.1
+# Version         : v1.2
 # Date            : 2014-08-26
 # Usage           : showpower
 # Notes           : The field "status" has a fixed value "Discharging" 
@@ -16,7 +16,7 @@
 # Date     By       Description
 # 20140826 BL       0 add script header
 #                   0 made a bit more robust
-#
+# 20140914 BL       small cleanup
 #============================================================================
 
 devide_1000000 () {

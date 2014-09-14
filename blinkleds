@@ -2,7 +2,7 @@
 # Script_name     : blinkleds
 # Author          : Bert Lindeman
 # Description     : Have the EV3-leds blink red amber and green
-# Version         : v1.1
+# Version         : v1.2
 # Date            : 2014-08-26
 # Usage           : blinkleds
 # Notes           : No parameters used
