@@ -5,7 +5,7 @@
 #                   This script is meant to be run in the boot sequence
 # Version         : v1.1
 # Date            : 2014-08-11
-# Usage           : tellip
+# Usage           : tellIP
 #                   Tell (speak) what IP address(es) this brick has.
 #                   So you can hear the IP address 
 #                   in stead of pinging to find it.
