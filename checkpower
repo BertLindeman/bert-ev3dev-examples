@@ -4,7 +4,7 @@
 # Description     : Check the battery voltage and warn if the voltage is 
 #                   less than 7 volts,
 #                   also set the left EV3 led to blinking green, amber or red.
-# Version         : v1.1
+# Version         : v1.2
 # Date            : 2014-08-26
 # Usage           : checkpower 
 #                   No arguments needed nor used
@@ -29,6 +29,10 @@
 #                     Last drop of voltage e.g. was too much
 #                     from 6303066 to 5668733 in 10 minutes (my check interval)
 #                     Causing auto? shutdown.
+# 20140902 BL       o add the momentary current to the message
+# 20140914 BL       o add the voltage to the blinkvoltage call,
+#                     to adapt the type of blinking.
+#                     Since kernel 3.16.1 leds can be better controlled.
 #============================================================================
 
 
@@ -38,23 +42,23 @@
    voltage=`cat voltage_now`
    # voltage is in microvolt as documented in include/linux/power_supply.h
    # Did not take the trouble to format this.
-
+   current=`cat current_now`
    
-   if   [ $voltage -lt 6100000 ]; then 
-        /usr/local/bin/blinkvoltage red  
+   if   [ $voltage -lt 6200000 ]; then 
+        /usr/local/bin/blinkvoltage red $voltage
         beep
         status=LOW
         # issue a warning; if setup, then cron can email messages like this.
         echo -e "WARNING: voltage $status: $voltage"
    elif [ $voltage -lt 6500000 ]; then 
-        /usr/local/bin/blinkvoltage amber  
+        /usr/local/bin/blinkvoltage amber $voltage 
         status=MED
         echo -e "WARNING: voltage $status: $voltage"
    elif [ $voltage -lt 7000000 ]; then 
-        /usr/local/bin/blinkvoltage green
+        /usr/local/bin/blinkvoltage green $voltage
         status=WARN  
    else
-        /usr/local/bin/blinkvoltage none
+        /usr/local/bin/blinkvoltage none $voltage
         status=OK
    fi  
 
@@ -62,7 +66,7 @@
    : "${ENVIRONMENT:=non-cron}"
    
    if [ "$ENVIRONMENT" == "non-cron" ]; then # just a message; no need to add to syslog 
-      echo -e "voltage $status: $voltage"
+      echo -e "voltage $status: $voltage; current: $current "
    else
-      echo -e "`date +"%b %d %T"` $HOSTNAME cron: $ENVIRONMENT -  voltage $status: $voltage" >> /var/log/syslog
+      echo -e "`date +"%b %d %T"` $HOSTNAME cron: $ENVIRONMENT -  voltage $status: $voltage; current: $current" >> /var/log/syslog
    fi   

@@ -17,37 +17,115 @@
 # Date     By       Description
 # 20140826 BL       o Add script header
 #                   o try to prevent abmber blinking flipflop red/green
+# 20140914 BL       Also use the actual voltage to set the blinkling
 #============================================================================
 
 
-  side=left 
+  side=left # side to use for the blinking 
+  
+  v0=6000000 # low
+  v1=7100000
+  v2=7500000
+  v3=8000000 # very good
+
+get_delay() {
+# purpose: Determine delay_on and delay_off values depending on current voltage
+
+  # make the sum 1000 so a one second interval
+
+  pctOK=$(bc <<< "scale=0; ($voltage * 100) / ${v3}")
+  if   [ $pctOK -ge 95 ]; then # 7.6V 
+    intens=10
+    # dead slow
+    delay_on=10
+    delay_off=990
+  elif [ $pctOK -ge 85 ]; then # 6.8V   
+    intens=127
+    # 50/50 but a bit faster
+    delay_on=250
+    delay_off=250    
+  elif [ $pctOK -ge 75 ]; then # 6.0V 
+    intens=255
+    #rapid blink
+    delay_on=50
+    delay_off=150
+  else 
+    intens=255
+    #rapid blink
+    delay_on=20
+    delay_off=180
+  fi   
+  # echo "\$delay_off=$delay_off \$delay_on=$delay_on \$intens=$intens"
+}  
+# to prevent flipflopping red<-->green set triggers close to eachother  
+# not ALWAYS successful. Do not have a way (yet) to ensure
+# AMBER leds and not flip=flopping green/red
+setAmber() {
+      echo timer > /sys/class/leds/ev3:green:$side/trigger
+      echo timer > /sys/class/leds/ev3:red:$side/trigger
+      echo 500 > /sys/class/leds/ev3:green:$side/delay_on
+      echo 500 > /sys/class/leds/ev3:red:$side/delay_on
+      echo 500 > /sys/class/leds/ev3:green:$side/delay_off
+      echo 500 > /sys/class/leds/ev3:red:$side/delay_off
+      echo $delay_off > /sys/class/leds/ev3:green:$side/delay_off
+      echo $delay_off > /sys/class/leds/ev3:red:$side/delay_off
+      echo $delay_on  > /sys/class/leds/ev3:green:$side/delay_on
+      echo $delay_on  > /sys/class/leds/ev3:red:$side/delay_on
+      echo $intens    > /sys/class/leds/ev3:green:$side/brightness
+      echo $intens    > /sys/class/leds/ev3:red:$side/brightness
+}
+
+setRed() {
+      echo timer > /sys/class/leds/ev3:red:$side/trigger
+      echo $intens    > /sys/class/leds/ev3:red:$side/brightness
+      echo $delay_on  > /sys/class/leds/ev3:red:$side/delay_on
+      echo $delay_off > /sys/class/leds/ev3:red:$side/delay_off
+}
+
+setGrn() {
+      echo timer > /sys/class/leds/ev3:green:$side/trigger
+      echo $intens    > /sys/class/leds/ev3:green:$side/brightness
+      echo $delay_on  > /sys/class/leds/ev3:green:$side/delay_on
+      echo $delay_off > /sys/class/leds/ev3:green:$side/delay_off
+
+}  
+    
+  # make sure we do have the variables
+  trigger=""
+  voltage=0
 
   # reset BOTH red and green leds unless we want amber
-  if [ "$#" -le 0 ]; then
-     trigger="none"
-  else 
-     trigger=$1
+  if [ "$#" -lt 1 ]; then
+       trigger="none"
+  else
+    if [ "$#" -ge 1 ]; then
+       trigger=$1
+       if [ "$#" -ge 2 ]; then
+         voltage=$2
+       fi
+    fi   
   fi
+
   # first set all left colors OFF
   ledbase="/sys/class/leds/ev3:red:$side"
-  echo 0 > $ledbase/brightness
   echo none > $ledbase/trigger
+  echo    0 > $ledbase/brightness
+  
   ledbase="/sys/class/leds/ev3:green:$side"
-  echo 0 > $ledbase/brightness
   echo none > $ledbase/trigger
+  echo    0 > $ledbase/brightness
  
-  if   [ "$trigger" == none     ]; then exit 0 # a good point to leave here
-  elif [ "$trigger" == amber    ]; then 
-      echo timer > /sys/class/leds/ev3:red:$side/trigger
-      echo timer > /sys/class/leds/ev3:green:$side/trigger
-      echo 1     > /sys/class/leds/ev3:red:$side/brightness
-      echo 1     > /sys/class/leds/ev3:green:$side/brightness
-  elif [ "$trigger" == "red"    ]; then setcolor=$trigger
-      echo timer > /sys/class/leds/ev3:$setcolor:$side/trigger
-      echo 1     > /sys/class/leds/ev3:$setcolor:$side/brightness
-  elif [ "$trigger" == "green"  ]; then setcolor=$trigger
-      echo timer > /sys/class/leds/ev3:$setcolor:$side/trigger
-      echo 1     > /sys/class/leds/ev3:$setcolor:$side/brightness
+  if   [ "$trigger" == none     ]; then 
+      exit 0 # a good point to leave here leds have been set already
+  elif [ "$trigger" == "amber"    ]; then 
+      get_delay
+      setAmber $delay_on $delay_off
+  elif [ "$trigger" == "red"    ]; then 
+      get_delay
+      setRed $delay_on $delay_off
+  elif [ "$trigger" == "green"  ]; then
+      get_delay
+      setGrn $delay_on $delay_off
   fi    
 
 exit 0
