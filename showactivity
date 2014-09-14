@@ -30,3 +30,6 @@
 echo mmc0  > /sys/class/leds/ev3\:green\:right/trigger
 echo 1     > /sys/class/leds/ev3\:green\:right/brightness
 #
+#echo heartbeat  > /sys/class/leds/ev3\:red\:right/trigger
+#echo 117        > /sys/class/leds/ev3\:red\:right/brightness
+#
