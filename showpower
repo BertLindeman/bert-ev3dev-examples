@@ -1,4 +1,4 @@
-#!/bin/bash -u           
+#!/bin/bash -u
 # Script_name     : showpower
 # Author          : Bert Lindeman
 # Description     : Show variables related to EV3 battery
@@ -18,7 +18,6 @@
 #                   0 made a bit more robust
 #
 #============================================================================
-
 
 devide_1000000 () {
    volt=$(bc <<< "scale=7; $2/1000000")

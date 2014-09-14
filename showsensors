@@ -28,20 +28,19 @@ do
   # echo -e "Process $i \"${sensors[$i]}\""
   if [ -e "${sensors[$i]}" ]; then
       cd "${sensors[$i]}"
-      echo "Process $i `pwd`" 
-      echo " sensor $i type: `cat type_id` on port `cat port_name` "
-      echo "dp :                  `cat dp`"
-      echo "mode:                 `cat mode`"
-      echo "modes:                `cat modes`"
-      echo "num_values:           `cat num_values`"
+      echo -e "Process $i `pwd`" 
+      echo -e " sensor $i type: `cat type_id` on port `cat port_name` "
+      echo -e "dp :                  `cat dp`"
+      echo -e "mode:                 `cat mode`"
+      echo -e "modes:                `cat modes`"
+      echo -e "num_values:           `cat num_values`"
       num_values="`cat num_values`"
       for (( v=0; v<$num_values; v++ ))
       do
-        echo "value$v:               `cat value$v`"
+        echo -e  "value$v:               `cat value$v`"
       done
-      echo "units:                `cat units`"
-      echo -e "uevent:          \n`cat uevent` \n"
-      echo " "
+      echo -e "units:                `cat units`"
+      echo -e "uevent:          \n`cat uevent` \n\n"
   else
       echo -e "Expected path \"${sensors[$i]}\" does not exist"
   fi
