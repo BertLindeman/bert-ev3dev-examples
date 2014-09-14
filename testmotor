@@ -2,7 +2,7 @@
 # Script_name     : testmotor
 # Author          : Bert Lindeman
 # Description     : Fiddle a bit with a connected motor
-# Version         : v1.1
+# Version         : v1.2
 # Date            : 2014-08-26
 # Usage           : testmotor
 # Notes           : One parameter (optional): the number of the tacho-motor
@@ -16,6 +16,8 @@
 # Date     By       Description
 # 20140826 BL       o add script header
 #                   o check for missing or too many argument(s)
+# 20140914 BL       o Add new attribute (3.16.1) encoder_mode
+#                   o small cleanup
 #
 #============================================================================
 
@@ -33,33 +35,42 @@ fi
 showStateS () {
  for (( i=1; i<=5; i++ ))
  do
-  printf "%16s: %6d  " "$DUTY_SP_VAR" " `cat  $MOTORPATH/$DUTY_SP_VAR`"
-  printf "%10s: %10s  " "state" "`cat  $MOTORPATH/state`"
-  printf "%10s: %6d  " "position" " `cat  $MOTORPATH/position`"
-  printf "%17s: %6d\n" "pulses_per_second" " `cat  $MOTORPATH/pulses_per_second`"
+  printf "%14s: %5d  " "duty_cycle_sp"     "`cat  $MOTORPATH/duty_cycle_sp`"
+  printf "%8s: %10s  " "state"             "`cat  $MOTORPATH/state`"
+  printf "%12s: %9s  " "encoder_mode"      "`cat  $MOTORPATH/encoder_mode`"
+  printf "%18s: %6d  " "position"          "`cat  $MOTORPATH/position`"
+  printf "%16s: %6d\n" "pulses_per_second" "`cat  $MOTORPATH/pulses_per_second`"
   sleep 0.2
  done
 }
 
 echo "Working with motorpath: $MOTORPATH"
 if [ -e $MOTORPATH/ ]; then
-        DUTY_SP_VAR=duty_cycle_sp
+        echo   1 > $MOTORPATH/reset
+        ## DUTY_SP_VAR=duty_cycle_sp
         echo -e "\t\t==== regulation_mode OFF"
         echo   off > $MOTORPATH/regulation_mode
-        echo   0 > $MOTORPATH/$DUTY_SP_VAR
+        echo   0 > $MOTORPATH/duty_cycle_sp
         echo   1 > $MOTORPATH/run
         showStateS
         sleep 0.1
-        echo  25 > $MOTORPATH/$DUTY_SP_VAR
+        echo  25 > $MOTORPATH/duty_cycle_sp
         showStateS
         sleep 0.7
-        echo  50 > $MOTORPATH/$DUTY_SP_VAR
+        echo -e "\t\t==== encoder_mode inverted "
+        echo  inverted > $MOTORPATH/encoder_mode
         showStateS
         sleep 0.7
-        echo -50 > $MOTORPATH/$DUTY_SP_VAR
+        echo  50 > $MOTORPATH/duty_cycle_sp
         showStateS
-        echo -e "\t\t==== regulation_mode ON"
+        sleep 0.7
+        echo -e "\t\t==== duty_cycle_sp to negative "
+        echo -50 > $MOTORPATH/duty_cycle_sp
+        showStateS
+        echo -e "\t\t==== regulation_mode ON  || duty_cycle_sp to zero encoder_mode normal "
+        echo  normal > $MOTORPATH/encoder_mode
         echo   on > $MOTORPATH/regulation_mode
+        echo 0 > $MOTORPATH/duty_cycle_sp
         sleep 0.2
         showStateS
         echo  500 > $MOTORPATH/pulses_per_second_sp

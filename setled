@@ -4,7 +4,7 @@
 # Description     : Set an EV3-led
 # Version         : v1.1
 # Date            : 2014-08-26
-# Usage           : ./setled
+# Usage           : setled
 # Notes           : 4 optional parameters:
 #                   color [side [ON | OFF [valid MODE]]] 
 # Copyright       : 2014 Bert Lindeman
@@ -15,6 +15,9 @@
 # Changelog        
 # Date     By       Description
 # 20140826 BL       add script header
+# 20140910 BL       Set ON to a higher value than 1 
+#                   brightness since kernel 3.16.1 is honoured
+#                   and no longer a switch                   
 #
 #============================================================================
 
@@ -99,10 +102,10 @@ verifyLEDtrigger () {
 
  case $mode in
   on)
-      command="echo";  oneORzero=1
+      command="echo";  valueORzero=127
      ;;
   off)
-      command="echo";  oneORzero=0 
+      command="echo";  valueORzero=0 
      ;;
   "")
       command="cat" # default
@@ -165,7 +168,7 @@ verifyLEDtrigger () {
    fi  
    # showLEDtrigger $ledtriggerpath  
    
-   echo $oneORzero > $ledbrightness 
+   echo $valueORzero > $ledbrightness 
    if [ $? -ne 0 ]; then
      echo -e "!!!!!!!!returncode of command: $?"
    fi  
