@@ -2,10 +2,10 @@
 # Script_name     : showleds
 # Author          : Bert Lindeman
 # Description     : Show values of EV3-leds
-# Version         : v1.1  
+# Version         : v1.2  
 # Date            : 2014-08-26
-# Usage           : ./showleds
-# Notes           : No arguments needed or used       
+# Usage           : showleds
+# Notes           : No arguments needed nor used       
 #                   o brightness is only non-zero at the time
 #                     that the led indeed *is* giving light.
 #                     So a blinking led might show zero or non-zero.
@@ -18,12 +18,14 @@
 # Date     By       Description
 # 20140826 BL       o Show delay_on and delay_off if available for 
 #                     this led and for it's trigger
-#                   o adapt usage clause (not parameters)
-#
+#                   o adapt usage clause (no parameters)
+# 20140914 BL       Color for some values
 #============================================================================
 
 
 #
+
+. /usr/local/bin/bert_ev3dev_functions
 
 usageEXIT () {
     echo "$1"
@@ -32,28 +34,6 @@ usageEXIT () {
     exit 1
 }
 
-  if [ -e /usr/local/bin/asciicolors ]; 
-  then .  /usr/local/bin/asciicolors
-  else    black='\e[0;30m'
-    red='\e[0;31m'
-    green='\e[0;32m'
-    yellow='\e[0;33m'
-    blue='\e[0;34m'
-    magenta='\e[0;35m'
-    cyan='\e[0;36m'
-    white='\e[0;37m'
-
-    brblack='\e[1;30m'
-    brred='\e[1;31m'
-    brgreen='\e[1;32m'
-    bryellow='\e[1;33m'
-    brblue='\e[1;34m'
-    brmagenta='\e[1;35m'
-    brcyan='\e[1;36m'
-    brwhite='\e[1;37m'
-
-    endColor='\e[0m'
-  fi
 
 declare _A brightnessArr
 declare _A triggerArr
@@ -123,14 +103,27 @@ done
       curColor=\$br$ledcolor # dereference $ledcolor to get bright colorcode for ledcolor
       
       if [ "$side" == "right" ] ; then
-        curside="right"; sidealign=""
+        curside="right"; sidealign=""  # results in %11s so align right
       else  
-        curside="left" ; sidealign="-"
+        curside="left" ; sidealign="-" # results in %-11s so align left
       fi
-      if [ ${brightnessArr[$icol$iside]} == "0" ]; then brightnessCol=$yellow
-                                                   else brightnessCol=$green
+      if [ ${brightnessArr[$icol$iside]} == "0" ]; then brightnessCol=$white
+                                                   else brightnessCol=$brgreen
       fi
-      printf `eval echo $curColor`"%-6s $white%$sidealign""11s %10s %8s %8s ${triggerCol[$icol$iside]}%-40s\n" $ledcolor $curside ${brightnessArr[$icol$iside]} ${delayON[$icol$iside]} ${delayOFF[$icol$iside]} ${triggerArr[$icol$iside]} 
+      if [ ${delayON[$icol$iside]} == "0" ]; then delay_onCol=$white
+                                             else delay_onCol=$brgreen
+      fi
+      if [ ${delayOFF[$icol$iside]} == "0" ]; then delay_offCol=$white
+                                              else delay_offCol=$brgreen
+      fi
+      printf "`eval echo $curColor`%-6s ${white}%${sidealign}11s ${brightnessCol}%10s$white ${delay_onCol}%8s$white ${delay_offCol}%8s$white ${triggerCol[$icol$iside]}%-40s\n" \
+      "$ledcolor" \
+      "$curside" \
+      "${brightnessArr[$icol$iside]}" \
+      "${delayON[$icol$iside]}" \
+      "${delayOFF[$icol$iside]}" \
+      "${triggerArr[$icol$iside]}" 
     done
   done 
   echo -e " ${endColor} " # back to normal
+  

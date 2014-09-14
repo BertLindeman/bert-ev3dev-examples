@@ -15,46 +15,55 @@
 # Date     By       Description
 # 20140826 BL       o Added script header
 #                   o Show in the terminal what is being done.
-#
+# 20140906 BL       o Wait a little linger at each step
+#                     Update to kernel 3.16.1 made things FASTER
+#                   o Set brightness to more than 1 as this NOW works.
+#                     use to make sliding colors
 #============================================================================
-
-
-
-echo "   deactivate first"
-echo none > /sys/class/leds/ev3\:green\:right/trigger
 #
-echo 0 > /sys/class/leds/ev3\:green\:left/brightness
-echo 0 > /sys/class/leds/ev3\:green\:right/brightness
-sleep 0.1s
-COL1="green"
-COL2="red"
-for (( c=1; c<=5; c++ ))
-  do
-   echo "send 1 to brightness of $COL1 led; left and right"
-   echo 1 > /sys/class/leds/ev3\:$COL1\:left/brightness
-   echo 1 > /sys/class/leds/ev3\:$COL1\:right/brightness
-   sleep 0.2s
-   #
-   echo "send 1 to brightness of $COL2 led; left and right"
-   echo 1 > /sys/class/leds/ev3\:$COL2\:left/brightness
-   echo 1 > /sys/class/leds/ev3\:$COL2\:right/brightness
-   sleep 0.2s
-   echo "send 0 to brightness of $COL2 led; left and right"
-   echo 0 > /sys/class/leds/ev3\:$COL2\:left/brightness
-   echo 0 > /sys/class/leds/ev3\:$COL2\:right/brightness
-   sleep 0.2s
-   #
-   echo "send 0 to brightness of $COL2 led; left and right"
-   echo 0 > /sys/class/leds/ev3\:$COL1\:left/brightness
-   echo 0 > /sys/class/leds/ev3\:$COL1\:right/brightness
-   sleep 0.2s
-   echo "send 1 to brightness of $COL2 led; left and right"
-   echo 1 > /sys/class/leds/ev3\:$COL2\:left/brightness
-   echo 1 > /sys/class/leds/ev3\:$COL2\:right/brightness
-   sleep 0.2s
-  done
-echo "deativate again"  
-   echo "send 0 to brightness of $COL2 led; left and right"
-echo 0 > /sys/class/leds/ev3\:$COL2\:left/brightness
-echo 0 > /sys/class/leds/ev3\:$COL2\:right/brightness
+. /usr/local/bin/bert_ev3dev_functions
+
+
+# echo "   deactivate first"
+echo none > /sys/class/leds/ev3\:green\:right/trigger
+echo none > /sys/class/leds/ev3\:red\:right/trigger
+echo none > /sys/class/leds/ev3\:green\:left/trigger
+echo none > /sys/class/leds/ev3\:red\:left/trigger
+OFFleds
+sleep 0.5s
+
+# red    -- green
+echo 255 > /sys/class/leds/ev3\:red\:left/brightness
+echo 255 > /sys/class/leds/ev3\:green\:right/brightness
+sleep 0.5s
+
+# green  -- red 
+echo   0 > /sys/class/leds/ev3\:red\:left/brightness
+echo 255 > /sys/class/leds/ev3\:red\:right/brightness
+echo 255 > /sys/class/leds/ev3\:green\:left/brightness
+echo   0 > /sys/class/leds/ev3\:green\:right/brightness
+sleep 0.5s
+echo 255 > /sys/class/leds/ev3\:red\:left/brightness
+echo   0 > /sys/class/leds/ev3\:red\:right/brightness
+echo   0 > /sys/class/leds/ev3\:green\:left/brightness
+echo 255 > /sys/class/leds/ev3\:green\:right/brightness
+sleep 0.5s
+
+OFFleds
+
+echo 255 > /sys/class/leds/ev3\:green\:left/brightness
+echo 255 > /sys/class/leds/ev3\:green\:right/brightness
+sleep 1s
+OFFgreen
+sleep 0.25s
+for (( b1=0; b1<=255; b1++ )); do
+  echo         $b1   > /sys/class/leds/ev3\:green\:left/brightness
+  echo  $((255-$b1)) > /sys/class/leds/ev3\:red\:left/brightness
+  echo         $b1   > /sys/class/leds/ev3\:red\:right/brightness
+  echo  $((255-$b1)) > /sys/class/leds/ev3\:green\:right/brightness
+  sleep 0.005s
+done
+sleep 1s
+
+OFFleds
 #

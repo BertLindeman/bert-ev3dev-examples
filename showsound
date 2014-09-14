@@ -15,32 +15,11 @@
 # Changelog        
 # Date     By       Description
 # 20140826 BL       Add script header
-#
+# 20140907 BL       Use centralized functions
 #============================================================================
 
 
-  if [ -e /usr/local/bin/asciicolors ]; 
-  then .  /usr/local/bin/asciicolors
-  else    black='\e[0;30m'
-    red='\e[0;31m'
-    green='\e[0;32m'
-    yellow='\e[0;33m'
-    blue='\e[0;34m'
-    magenta='\e[0;35m'
-    cyan='\e[0;36m'
-    white='\e[0;37m'
-
-    brblack='\e[1;30m'
-    brred='\e[1;31m'
-    brgreen='\e[1;32m'
-    bryellow='\e[1;33m'
-    brblue='\e[1;34m'
-    brmagenta='\e[1;35m'
-    brcyan='\e[1;36m'
-    brwhite='\e[1;37m'
-
-    endColor='\e[0m'
-  fi
+. /usr/local/bin/bert_ev3dev_functions
 
   cd "/sys/devices/platform/snd-legoev3/"
   echo "Report from `pwd`"

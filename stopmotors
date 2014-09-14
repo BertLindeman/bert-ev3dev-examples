@@ -13,21 +13,13 @@
 #
 # Changelog        
 # Date     By       Description
-#
+# 20140907 BL       Use centralized functions
 #
 #============================================================================
 
 
+. /usr/local/bin/bert_ev3dev_functions
 
-# set -vx
-  if [ -e /usr/local/bin/asciicolors ];
-    then .  /usr/local/bin/asciicolors
-  else
-    brgreen=""
-    brred=""
-    brwhite=""
-    brblue=""  
-  fi
 #
 showmotor () {
       if [ $motorpower -eq 0 ]; then motorcolor=$brgreen
