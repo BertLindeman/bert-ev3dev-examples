@@ -3,7 +3,7 @@
 # Author          : Bert Lindeman
 # Description     : Report active IP-addresses by speach
 #                   This script is meant to be run in the boot sequence
-# Version         : v1.1
+# Version         : v1.2
 # Date            : 2014-08-11
 # Usage           : tellIP
 #                   Tell (speak) what IP address(es) this brick has.
@@ -20,9 +20,11 @@
 #
 # Changelog        
 # Date     By       Description
-# 20140828 BL       It takes more time to complete wifi setup,
-#                   So do a few attempts and wait before giving up.
-#
+# 20140828 BL       o It takes more time to complete wifi setup,
+#                     So do a few attempts and wait before giving up.
+# 20140916 BL       o added some character at the start of the string 
+#                     To start speaking a bit later and get past the clicks
+#                     at the start of the text.
 #============================================================================
 
 
@@ -63,8 +65,8 @@ reportIF () {
   IFNAME=`echo $ifname | tr '[:lower:]' '[:upper:]' | sed 's/./&./g'`
   #  echo  "about to report $IP for $IFNAME" 
   splitText " $IFNAME $IP"
-  #  echo  "about to speaktext:\"  interface.  $splitText\"" 
-  speakText "  Interface.  $splitText" 
+  # echo  "about to speaktext: \"  \"interface.\"  \"$splitText\"" 
+  speakText "( . .  \"Interface.\"  \"$splitText\"" 
 }
 
  
