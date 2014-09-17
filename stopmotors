@@ -2,7 +2,7 @@
 # Script_name     : stopmotors
 # Author          : Bert Lindeman
 # Description     : Stop all recognized tacho motors
-# Version         : v1.1
+# Version         : v1.2
 # Date            : 2014-08-26
 # Usage           : stopmotors
 # Notes           : 
@@ -14,6 +14,7 @@
 # Changelog        
 # Date     By       Description
 # 20140907 BL       Use centralized functions
+# 20140916 BL       Do not use fixed number suffix on tacho-motor#
 #
 #============================================================================
 
@@ -29,11 +30,10 @@ showmotor () {
       #echo -e "${motorcolor}255"
 }
 
-# for (( m=0; m<=3; m++ ))  not available in /bin/sh
-
-for m in 0 1 2 3 
+for m in /sys/class/tacho-motor/tacho-motor*
   do
-    MOTORPATH="/sys/class/tacho-motor/tacho-motor$m"
+   # MOTORPATH="/sys/class/tacho-motor/tacho-motor$m"
+    MOTORPATH="$m"
     if [ -e $MOTORPATH ]; then
       printf "%-40s %-6s " "$MOTORPATH/run" "status" 
       
