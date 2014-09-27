@@ -88,7 +88,7 @@ done
 
 # clear
 
-  echo Report:
+  echo -e "Report from `dirname ${ledbase}`  ev3:{${red}red,${green}green${white}}:{left,right} "
   # header
   printf "$brwhite%-6s %-11s %10s %8s %8s %-40s$white\n" "color" "Side"        "Brightness" " dly_ON" "dly_OFF" "trigger"
   printf "$brwhite%-6s %-11s %10s %8s %8s %-40s$white\n" "-----" "-----------" "----------" " ------" "-------" "-------"

@@ -4,7 +4,7 @@
 # Description     : Show info of recognized sensors
 # Version         : v1.1
 # Date            : 2014-08-26
-# Usage           : ./showsensors
+# Usage           : showsensors
 # Notes           : 
 # Copyright       : 2014 Bert Lindeman
 # License         : GPL-3.0+
@@ -13,35 +13,45 @@
 #
 # Changelog        
 # Date     By       Description
-#
+# 20140924 BL       allow a parameter to only show ONE sensor
+#                   Easy to use watch and see only that sensor
 #
 #============================================================================
-
-
+#
+selectport=${1:-}
+#      parm1=${1:-noparm}
 #
 # determine which interface services what input port:
 #
 IFS=$' \n' read -a sensors <<< "`echo /sys/class/msensor/sensor*/`"
+#
+hits=0
 #
 for  i in "${!sensors[@]}" # ! walk the indexes
 do
   # echo -e "Process $i \"${sensors[$i]}\""
   if [ -e "${sensors[$i]}" ]; then
       cd "${sensors[$i]}"
-      echo -e "Process $i `pwd`" 
-      echo -e " sensor $i type: `cat type_id` on port `cat port_name` "
-      echo -e "dp :                  `cat dp`"
-      echo -e "mode:                 `cat mode`"
-      echo -e "modes:                `cat modes`"
-      echo -e "num_values:           `cat num_values`"
-      num_values="`cat num_values`"
-      for (( v=0; v<$num_values; v++ ))
-      do
-        echo -e  "value$v:               `cat value$v`"
-      done
-      echo -e "units:                `cat units`"
-      echo -e "uevent:          \n`cat uevent` \n\n"
+      if [ "$#" == 0 ] || [ "$selectport" == "`cat port_name`" ]; then
+        echo -e "Process $i `pwd`" 
+        echo -e " sensor $i type: `cat type_id` on port `cat port_name` "
+        echo -e "dp :                  `cat dp`"
+        echo -e "mode:                 `cat mode`"
+        echo -e "modes:                `cat modes`"
+        echo -e "num_values:           `cat num_values`"
+        num_values="`cat num_values`"
+        for (( v=0; v<$num_values; v++ ))
+        do
+          echo -e  "value$v:               `cat value$v`"
+        done
+        echo -e "units:                `cat units`"
+        echo -e "uevent:          \n`cat uevent` \n\n"
+        hits=1
+      fi  
   else
       echo -e "Expected path \"${sensors[$i]}\" does not exist"
   fi
 done     
+if [ $hits == 0  ];then
+  echo -e "Requested sensor on port $selectport not available" 
+fi
