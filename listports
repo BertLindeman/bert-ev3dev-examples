@@ -1,0 +1,149 @@
+#!/bin/bash -u           
+# Script_name     : listports
+# Author          : Bert Lindeman
+# Description     : List sensors and motors
+# Version         : v1.3
+# Date            : 2014-09-28
+# Usage           : listports
+# Notes           : 
+# Copyright       : 2014 Bert Lindeman
+# License         : GPL-3.0+
+#
+#
+#
+# Changelog        
+# Date     By       Description
+# 20140928 BL       o Adapt to updates in 
+#                       kernel version 3.16.1-3-ev3dev
+#                                  and 3.16.1-4-ev3dev
+#                   o remove field type_id
+#                   o slightly different file names
+#                   o motor type -> device_type
+#                   o issue 123: force mode to input ports and output ports
+
+. /usr/local/bin/bert_ev3dev_functions
+
+### "do" input ports:
+#findportstr=`find /sys/devices/platform/legoev3-ports -maxdepth 1  -name "in[1234]" `
+#  echo -e "find result:\n$findportstr\n"
+
+ haveportsin=""
+ haveportsout=""  
+ # outport=0
+
+findstr=`find /sys/devices/platform/legoev3-ports/ -maxdepth 2 -name "in[1234]\:*" `
+#
+#  echo -e "find2 result:\n$findstr\n"
+#
+for p in $findstr
+do 
+  basename="`basename $p`" 
+  dirname="`dirname $p`"
+  
+  # split basename before and after ":"
+  porttype1="${basename%%:*}"
+  porttype2="${p#*:}"
+  
+  device_type="`cat $p/device_type`"
+  #
+  # echo "DEBUG2 port: $porttype1 $porttype2  test for  ${porttype1:0:2} \=\= \"in\" $device_type "
+  #
+  if [ ${porttype1:0:2} == "in" ]; then
+    
+    driver_mode="`cat $dirname/mode`"
+    driver_state="`cat $dirname/state`"
+    inportnumber=${porttype1:2:1}  # in%
+    haveportsin="$haveportsin $inportnumber"
+    
+      Arrindir[$inportnumber]=${dirname}
+     Arrinmode[$inportnumber]=${driver_mode}
+    Arrinstate[$inportnumber]=${driver_state}
+     Arrinport[$inportnumber]=${inportnumber} 
+     Arrintype[$inportnumber]=${porttype2}
+     Arrinbase[$inportnumber]=${basename}
+    # backup path if no better one is found later 
+    Arrinctlpath[$inportnumber]=`echo -e "             ${brblue}/sys/devices/platform/legoev3-ports/in$inportnumber/mode${brwhite}"`
+   
+
+    pathColor="$green"
+    CURSENSOR="?"     # set default so we know if it was unknown
+    
+    findsensorctl ${Arrinport[$inportnumber]}
+    inlvl1=`echo -e /sys/class/msensor/sensor${CURSENSOR}/`    
+    Arrinsensormode[${inportnumber}]=`cat /sys/class/msensor/sensor${CURSENSOR}/mode`
+
+    # if unknown then red else green:
+    if [ "${CURSENSOR:0:1}" == "?"  ]; 
+    then  pathColor="$brred" ; 
+    else  pathColor="$green" ; 
+    fi  
+    Arrinctlpath[$inportnumber]=`echo -e ${pathColor}${inlvl1}$brwhite`     
+  fi
+  
+done
+
+##  motorports are deeper in the directory tree
+##    findstr=`find /sys/devices/platform/legoev3-ports/ -name "tacho-motor[[:digit:]]*"`
+##    echo -e "find result:\n$findstr\n"
+
+
+# findstr=`find /sys/devices/platform/legoev3-ports/ -maxdepth 2 -name "in[1234]\:*" -o  -name "out[ABCD]*" -name "*\:*"`
+findstr=`/bin/ls -d /sys/class/tacho-motor/tacho-motor*/  `
+#  echo -e "find2 result:\n$findstr\n"
+# and what about /sys/class/tacho-motor/tacho-motor*/
+
+# need to declare the arrays (Otherwise the index e.g. C is reported unbound..)
+
+declare -A Arroutbase=(    [A]=a [B]=b [C]=c [D]=d )
+declare -A Arroutdir=(     [A]=a [B]=b [C]=c [D]=d )
+declare -A Arroutport=(    [A]=a [B]=b [C]=c [D]=d )
+declare -A Arroutctlpath=( [A]=a [B]=b [C]=c [D]=d )
+declare -A Arrouttype=(    [A]=a [B]=b [C]=c [D]=d )
+declare -A Arroutrun=(     [A]=a [B]=b [C]=c [D]=d )
+declare -A Arroutstate=(     [A]=a [B]=b [C]=c [D]=d )
+
+for p in $findstr
+do 
+  basename="`basename $p`" 
+  dirname="`dirname $p`"
+  
+  # split basename before and after ":"
+  porttype1="${basename%%:*}"
+  porttype2="${p#*:}"
+  #
+  device_type="`cat $p/type`"
+  portname="`cat $p/port_name`"
+  outportletter=${portname:3} # out%
+  haveportsout="$haveportsout $outportletter"
+     Arroutbase[$outportletter]=${basename}
+      Arroutdir[$outportletter]=${dirname}
+     Arroutport[$outportletter]=${portname:3} # out%
+  
+  inlvl1=`echo $p`
+  Arroutctlpath[$outportletter]=`echo -e ${green}${inlvl1}$brwhite`
+  
+     Arrouttype[$outportletter]="`cat ${inlvl1}/type`"
+      Arroutrun[$outportletter]="`cat ${inlvl1}/run`"
+    Arroutstate[$outportletter]="`cat ${inlvl1}/state`" 
+done  
+
+# Report input ports:
+if [ "$haveportsin" != "" ]; then
+  echo -e "\n$brblue  Input ports recognized:\n"
+  printf "$brblue%4s %-10s %-10s %-15s %-25s %s\n$brwhite" "Port" "drv-mode" "drv-state" "sensor mode" "Basename" "Control directory"
+  
+  for i in $haveportsin;  do
+     printf "%4d %-10s %-10s %-15s %-25s %s\n" "${Arrinport[$i]}" "${Arrinmode[$i]}" "${Arrinstate[$i]}" "${Arrinsensormode[$i]}" "${Arrinbase[$i]}" "${Arrinctlpath[$i]}"
+  done
+fi
+
+# Report motorports:
+
+if [ "$haveportsout" != "" ]; then
+  echo -e "\n$brblue output ports recognized:\n"
+  printf "$brblue%4s %-21s %-3s %-11s %-15s %s\n$brwhite" "Port" "Type" "Run" "State" "Basename" "Control directory"
+  
+  for i in $haveportsout;  do
+    printf      "%4s %-21s %-3s %-11s %-15s %s\n" "${Arroutport[$i]}" "${Arrouttype[$i]}" "${Arroutrun[$i]}" "${Arroutstate[$i]}"  "${Arroutbase[$i]}" "${Arroutctlpath[$i]}"
+  done
+fi

@@ -241,4 +241,6 @@ perldoc
 *.old
 *.crlf
 calc_ntp_good
+calc_ntp_good.*
+package-stash-conflicts
 *_v1.1
