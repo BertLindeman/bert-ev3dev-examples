@@ -72,6 +72,56 @@ findsensorctl () {
   done
 }
 
+### general things:
+
+listcontains() {
+  for word in $1; do
+      [[ $word = $2 ]] && return 0
+  done
+  return 1
+}
+
+
+### screen manipulations:
+
+topofscreen() {
+  echo -ne "\033[0;0H"
+  COLUMNS=$(tput cols)
+  printf "%${COLUMNS}s\n"
+  # top and clear rest of the line:
+  echo -ne "\033[0;0H\033[2K"
+}
+
+# parm1 is line   (height) 0 = top
+# parm2 is column (width)  0 = left
+putcursor() {
+  echo -ne "\033[$1;$2f"
+}
+
+### ev3 functions:
+
+findmotorctl () {
+#
+# function to find which directory structure is used to control "this"
+# motor
+#
+# parm1: motor port LETTER
+# uppercase parm1:
+  parm1=`echo $1 | tr '[:lower:]' '[:upper:]'`
+  CURMOTOR="???????"
+  SEENPORT=""
+  for d in /sys/class/tacho-motor/tacho-motor*/;
+  do
+    port=`cat $d/port_name`
+    SEENPORT="$SEENPORT $port"
+    if [ "$port" == "out$parm1" ]; then
+      CURMOTOR=${d:0:-1}
+      return
+    fi
+  done
+  echo "SEENPORT: $SEENPORT"  
+}
+
 OFFred () {
 #
 # function to switch OFF the red EV3-leds (left and right)

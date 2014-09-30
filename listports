@@ -1,4 +1,4 @@
-#!/bin/bash -u           
+#!/bin/bash -u
 # Script_name     : listports
 # Author          : Bert Lindeman
 # Description     : List sensors and motors
@@ -23,13 +23,8 @@
 
 . /usr/local/bin/bert_ev3dev_functions
 
-### "do" input ports:
-#findportstr=`find /sys/devices/platform/legoev3-ports -maxdepth 1  -name "in[1234]" `
-#  echo -e "find result:\n$findportstr\n"
-
  haveportsin=""
  haveportsout=""  
- # outport=0
 
 findstr=`find /sys/devices/platform/legoev3-ports/ -maxdepth 2 -name "in[1234]\:*" `
 #
@@ -87,7 +82,6 @@ done
 ##    echo -e "find result:\n$findstr\n"
 
 
-# findstr=`find /sys/devices/platform/legoev3-ports/ -maxdepth 2 -name "in[1234]\:*" -o  -name "out[ABCD]*" -name "*\:*"`
 findstr=`/bin/ls -d /sys/class/tacho-motor/tacho-motor*/  `
 #  echo -e "find2 result:\n$findstr\n"
 # and what about /sys/class/tacho-motor/tacho-motor*/
@@ -100,7 +94,7 @@ declare -A Arroutport=(    [A]=a [B]=b [C]=c [D]=d )
 declare -A Arroutctlpath=( [A]=a [B]=b [C]=c [D]=d )
 declare -A Arrouttype=(    [A]=a [B]=b [C]=c [D]=d )
 declare -A Arroutrun=(     [A]=a [B]=b [C]=c [D]=d )
-declare -A Arroutstate=(     [A]=a [B]=b [C]=c [D]=d )
+declare -A Arroutstate=(   [A]=a [B]=b [C]=c [D]=d )
 
 for p in $findstr
 do 
