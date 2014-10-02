@@ -53,7 +53,7 @@ do
       Arrindir[$inportnumber]=${dirname}
      Arrinmode[$inportnumber]=${driver_mode}
     Arrinstate[$inportnumber]=${driver_state}
-     Arrinport[$inportnumber]=${inportnumber} 
+     Arrinport[$inportnumber]=${porttype1}                #${inportnumber} 
      Arrintype[$inportnumber]=${porttype2}
      Arrinbase[$inportnumber]=${basename}
     # backup path if no better one is found later 
@@ -63,7 +63,7 @@ do
     pathColor="$green"
     CURSENSOR="?"     # set default so we know if it was unknown
     
-    findsensorctl ${Arrinport[$inportnumber]}
+    findsensorctl ${inportnumber}
     inlvl1=`echo -e /sys/class/msensor/sensor${CURSENSOR}/`    
     Arrinsensormode[${inportnumber}]=`cat /sys/class/msensor/sensor${CURSENSOR}/mode`
 
@@ -111,7 +111,7 @@ do
   haveportsout="$haveportsout $outportletter"
      Arroutbase[$outportletter]=${basename}
       Arroutdir[$outportletter]=${dirname}
-     Arroutport[$outportletter]=${portname:3} # out%
+     Arroutport[$outportletter]=${portname} # out%
   
   inlvl1=`echo $p`
   Arroutctlpath[$outportletter]=`echo -e ${green}${inlvl1}$brwhite`
@@ -124,10 +124,10 @@ done
 # Report input ports:
 if [ "$haveportsin" != "" ]; then
   echo -e "\n$brblue  Input ports recognized:\n"
-  printf "$brblue%4s %-10s %-10s %-15s %-25s %s\n$brwhite" "Port" "drv-mode" "drv-state" "sensor mode" "Basename" "Control directory"
+  printf "$brblue%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n$brwhite" "Port" "drv-mode" "drv-state" "sensor mode" "run" "state" "Basename" "Control directory"
   
   for i in $haveportsin;  do
-     printf "%4d %-10s %-10s %-15s %-25s %s\n" "${Arrinport[$i]}" "${Arrinmode[$i]}" "${Arrinstate[$i]}" "${Arrinsensormode[$i]}" "${Arrinbase[$i]}" "${Arrinctlpath[$i]}"
+     printf     "%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n" "${Arrinport[$i]}" "${Arrinmode[$i]}" "${Arrinstate[$i]}" "${Arrinsensormode[$i]}" "R" "S" "${Arrinbase[$i]}" "${Arrinctlpath[$i]}"
   done
 fi
 
@@ -135,9 +135,9 @@ fi
 
 if [ "$haveportsout" != "" ]; then
   echo -e "\n$brblue output ports recognized:\n"
-  printf "$brblue%4s %-21s %-3s %-11s %-15s %s\n$brwhite" "Port" "Type" "Run" "State" "Basename" "Control directory"
+  printf "$brblue%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n$brwhite" "Port" "drv-mode" "drv-state" "Type" "Run" "State" "Basename" "Control directory"
   
   for i in $haveportsout;  do
-    printf      "%4s %-21s %-3s %-11s %-15s %s\n" "${Arroutport[$i]}" "${Arrouttype[$i]}" "${Arroutrun[$i]}" "${Arroutstate[$i]}"  "${Arroutbase[$i]}" "${Arroutctlpath[$i]}"
+    printf      "%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n" "${Arroutport[$i]}" " " " " "${Arrouttype[$i]}" "${Arroutrun[$i]}" "${Arroutstate[$i]}"  "${Arroutbase[$i]}" "${Arroutctlpath[$i]}"
   done
 fi
