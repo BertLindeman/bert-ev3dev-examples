@@ -98,6 +98,20 @@ putcursor() {
   echo -ne "\033[$1;$2f"
 }
 
+getxy(){
+  # save, clear screen
+  # tput smcup
+
+  echo -en "\E[6n";read -sdR CURPOS; CURPOS=${CURPOS#*[}
+
+  # restore
+  # tput rmcup
+
+  CURY=`echo "${CURPOS}" | cut -d ";" -f 1`
+  CURX=`echo "${CURPOS}" | cut -d ";" -f 2`
+}
+
+
 ### ev3 functions:
 
 findmotorctl () {

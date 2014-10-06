@@ -66,6 +66,16 @@ do
     findsensorctl ${inportnumber}
     inlvl1=`echo -e /sys/class/msensor/sensor${CURSENSOR}/`    
     Arrinsensormode[${inportnumber}]=`cat /sys/class/msensor/sensor${CURSENSOR}/mode`
+    if [ -e /sys/class/msensor/sensor${CURSENSOR}/fw_version  ]; then
+      Arrinfw[${inportnumber}]=`cat /sys/class/msensor/sensor${CURSENSOR}/fw_version`
+    else  
+      Arrinfw[${inportnumber}]=" "
+    fi        
+    if [ -e /sys/class/msensor/sensor${CURSENSOR}/poll_ms  ]; then
+      Arrinpoll[${inportnumber}]=`cat /sys/class/msensor/sensor${CURSENSOR}/poll_ms`
+    else  
+      Arrinpoll[${inportnumber}]=" "
+    fi        
 
     # if unknown then red else green:
     if [ "${CURSENSOR:0:1}" == "?"  ]; 
@@ -110,7 +120,7 @@ do
   outportletter=${portname:3} # out%
   haveportsout="$haveportsout $outportletter"
      Arroutbase[$outportletter]=${basename}
-      Arroutdir[$outportletter]=${dirname}
+      Arroutdir[$outportletter]="/sys/devices/platform/legoev3-ports/"${portname}
      Arroutport[$outportletter]=${portname} # out%
   
   inlvl1=`echo $p`
@@ -124,10 +134,11 @@ done
 # Report input ports:
 if [ "$haveportsin" != "" ]; then
   echo -e "\n$brblue  Input ports recognized:\n"
-  printf "$brblue%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n$brwhite" "Port" "drv-mode" "drv-state" "sensor mode" "run" "state" "Basename" "Control directory"
+  printf "$brblue%4s %-10s %-10s %-14s %-4s %-11s %-25s %s\n$brwhite" "Port" "drv-mode" "drv-state" "sensor mode" "Poll" "fwVer" "Basename" "Control directory"
   
   for i in $haveportsin;  do
-     printf     "%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n" "${Arrinport[$i]}" "${Arrinmode[$i]}" "${Arrinstate[$i]}" "${Arrinsensormode[$i]}" "R" "S" "${Arrinbase[$i]}" "${Arrinctlpath[$i]}"
+     printf     "%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n" "${Arrinport[$i]}"   " " " " "${Arrinsensormode[$i]}" "${Arrinpoll[$i]}" "${Arrinfw[$i]}" " " "${Arrinctlpath[$i]}" 
+     printf     "%4s %-10s %-10s %-15s %-3s %-11s %-25s ${green}%-25s$brwhite\n\n" " " "${Arrinmode[$i]}" "${Arrinstate[$i]}"  " " " " " " "${Arrinbase[$i]}" "${Arrindir[$i]}"
   done
 fi
 
@@ -139,5 +150,6 @@ if [ "$haveportsout" != "" ]; then
   
   for i in $haveportsout;  do
     printf      "%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n" "${Arroutport[$i]}" " " " " "${Arrouttype[$i]}" "${Arroutrun[$i]}" "${Arroutstate[$i]}"  "${Arroutbase[$i]}" "${Arroutctlpath[$i]}"
+    printf      "%84s ${green}%-25s$brwhite\n\n" " " "${Arroutdir[$i]}"
   done
 fi
