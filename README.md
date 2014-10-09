@@ -37,7 +37,8 @@ They are are meant to be run on a terminal session, like in an ssl-session.
 
 For this an update is needed to `/etc/rc.local`
 
-Add the next lines to the bottom of `/etc/rc.local`
+Add the next lines near the bottom of `/etc/rc.local`
+But **before** the `exit 0`
 
 ```
 if [ -e /media/mmc_p1/tellIP ]; then
