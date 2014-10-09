@@ -32,7 +32,25 @@ They are are meant to be run on a terminal session, like in an ssl-session.
     * [testmotor](https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/testmotor) Test one motor. Too simple script, only uses a fixed suffix on ```/sys/class/tacho-motor/tacho-motor``` The kernel takes the *next* number if a motor is plugged in. Algorithm in **showmotor** is connecting motor port to tacho-motor suffix. You can call testmotor with one parameter: the number of the motor. E.g. ```testmotor 3```
     
 
-### Have your EV3 report the IP-addresses by speach after boot
+### Have your EV3 report the IP-addresses by speach after boot 
+##### Starting at ev3dev image ev3dev-jessie-2014-10-07
+
+For this an update is needed to `/etc/rc.local`
+
+Add the next lines to the bottom of `/etc/rc.local`
+
+```
+if [ -e /media/mmc_p1/tellIP ]; then
+echo "Executing /media/mmc_p1/tellIP"
+. /media/mmc_p1/tellIP
+fi
+```
+
+and place the script [`tellIP`](https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/tellIP)
+in the directory: `/media/mmc_p1/`
+
+##### OLDER ev3dev images (ev3dev-jessie-2014-10-07-12 and before)
+
 For this an update is needed to `/media/mmc_p1/ev3dev.rc.local`
 
 Add the next lines to the bottom of `/media/mmc_p1/ev3dev.rc.local`
@@ -46,4 +64,3 @@ fi
 
 and place the script [`tellIP`](https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/tellIP)
 in the same directory: `/media/mmc_p1/`
-
