@@ -81,14 +81,27 @@ listcontains() {
   return 1
 }
 
+# Usage           : stringcontains needle haystack
+# needle   if missing: empty string
+# haystack if missing: empty string
+# An empty string contains nothing
+stringcontains() {
+  substring="${1-""}" 
+  string="${2:-""}"    
+  if [ -z "$string" ]; then return 1 ; fi
+  if [[ "$string" == *"$substring"* ]]; then return 0
+  else 					     return 1
+  fi
+}
+
 
 ### screen manipulations:
 
+#  echo -ne "\033[0;0H"
+#  COLUMNS=$(tput cols)
+#  printf "%${COLUMNS}s\n"
+#  # top and clear rest of the line:
 topofscreen() {
-  echo -ne "\033[0;0H"
-  COLUMNS=$(tput cols)
-  printf "%${COLUMNS}s\n"
-  # top and clear rest of the line:
   echo -ne "\033[0;0H\033[2K"
 }
 
