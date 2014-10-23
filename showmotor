@@ -15,6 +15,7 @@
 # Date     By       Description
 # 20140826 BL       Add script header
 # 20140911 BL       adapt to changes at kernel 3.16.1-2
+# 20141023 BL       adapt to changes at kernel 3.16.1-6
 #============================================================================
 # 
 # 
@@ -24,126 +25,269 @@
 
 #
 # determine which motor(port) is connected to what tacho-motor-number  
-#   /sys/class/tacho-motor/tacho-motor*/port_name is the link between motor# and port
+#   /sys/class/tacho-motor/motor*/port_name is the link between motor# and port
 #
-IFS=$' \n' read -a tachoPath <<< "`echo /sys/class/tacho-motor/tacho-motor*/`"
 #
-for  i in ${!tachoPath[@]} # ! walk the indexes
+IFS=$' \n' read -a tachoPath <<< "`echo /sys/class/tacho-motor/motor*/ /sys/class/dc-motor/motor*/`"
+#
+for  i in ${!tachoPath[@]} # ! walk the index
 do
-  #echo -e "process $i ${tachoPath[$i]}"
+ echo -e "process $i ${tachoPath[$i]}"
  if [ -e ${tachoPath[$i]} ]; then
    cd ${tachoPath[$i]}  
-   #
+
+   # determine motortype
+   p=`pwd`
+   basename="`basename $p`"
+   dirname="`dirname $p`"
+   dir3="`basename ${dirname}`" # third node in path
+
    if [ $? -eq 0 ] ;  then
-     printf "${brblue}Motor on port $brwhite%s$brblue as type=$brwhite%-10s$brblue at\
- $brwhite%s$white\n" "`cat port_name`" "`cat type`" "${tachoPath[$i]} "
+     type="."
+     if [ -e type ]; then
+        type="`cat type`"
+        attribute="tacho"  
+     else
+        type=$dir3
+        attribute="dc"
+     fi
 
-     curval=`cat duty_cycle_sp`
-     line1_1=`printf "%-21s %12d\n"  "duty_cycle_sp:"        "$curval"`
+     printf "${brblue}Motor on port $brwhite%s$brblue as type=$brwhite%-10s$brblue at $brwhite%s$white\n" \
+             "`cat port_name`" "$type" "${tachoPath[$i]} "
 
-     curval=`cat pulses_per_second_sp`
-     line2_1=`printf "%-21s %12d\n"  "pulses_per_second_sp:" "$curval"`
+     curval="."; title="_"
+     if [ -e duty_cycle_sp ] ; then
+        curval=`cat duty_cycle_sp`
+        title="duty_cycle_sp:"
+     fi   
+     line1_1=`printf "%-21s %12s\n"  "${title}"        "$curval"`
+
+     curval="."; title="_"
+     if [ -e pulses_per_second_sp ] ; then
+        curval=`cat pulses_per_second_sp` 
+        title="pulses_per_second_sp:"
+     fi
+     line2_1=`printf "%-21s %12s\n"  "${title}" "$curval"`
      
-     curval=`cat encoder_mode`
-     encval=$curval
-     line3_1=`printf "%-21s %12s\n"  "encoder_mode:"          "$curval"`
+     curval="."; title="_"
+     if [ -e encoder_mode ] ; then
+        curval=`cat encoder_mode`
+        title="encoder_mode:"
+     fi
+     encval=$curval # use later.. 
+     line3_1=`printf "%-21s %12s\n"  "${title}" "$curval"`
 
-     curval=`cat position_sp`
-     line4_1=`printf "%-21s %12d\n"  "position_sp:"           "$curval"`
+     curval="."; title="_"
+     if [ -e position_sp ] ; then
+        curval=`cat position_sp`
+        title="position_sp:"
+     fi
+     line4_1=`printf "%-21s %12s\n"  "${title}" "$curval"`
 
-     curval=`cat time_sp`
-     line5_1=`printf "%-21s %12d\n"  "time_sp:"               "$curval"`
+     curval="."; title="_"     
+     if [ -e time_sp ] ; then
+        curval=`cat time_sp` 
+        title="time_sp:"
+     fi
+     line5_1=`printf "%-21s %12s\n"  "${title}" "$curval"`
 
-     curval=`cat ramp_down_sp`
-     line6_1=`printf "%-21s %12d\n"  "ramp_down_sp:"          "$curval"`
-
-     curval=`cat ramp_up_sp`
-     line7_1=`printf "%-21s %12d\n"  "ramp_up_sp:"            "$curval"`
+     curval="."; title="_"     
+     if [ -e ramp_down_sp ] ; then
+        curval=`cat ramp_down_sp` 
+        title="ramp_down_sp:"
+     elif [ -e ramp_down_ms ] ; then
+        curval=`cat ramp_down_ms` 
+        title="ramp_down_ms:" 
+     fi
+     line6_1=`printf "%-21s %12s\n"  "${title}" "$curval"`
+     
+     curval="."; title="_"     
+     if [ -e ramp_up_sp ] ; then
+        curval=`cat ramp_up_sp` 
+        title="ramp_up_sp:"
+     elif [ -e ramp_up_ms ] ; then
+        curval=`cat ramp_up_ms` 
+        title="ramp_up_ms:"
+     fi
+     line7_1=`printf "%-21s %12s\n"  "${title}" "$curval"`
+     
      line8_1="_ ."          
      line9_1="_ ."          
      line10_1="  "          
-     
-     curval=`cat duty_cycle`
-     line1_2=`printf "%-21s %12d\n"  "duty_cycle:"            "$curval"`
 
-     curval=`cat pulses_per_second`
-     line2_2=`printf "%-21s %12d\n"  "pulses_per_second:"     "$curval"`
+     curval="."; title="_"
+     if [ -e pulses_per_second_sp ]; then
+        curval=`cat pulses_per_second` 
+        title="pulses_per_second:"
+     fi
+     line2_2=`printf "%-21s %12s\n"  "${title}" "$curval"`
      
-     curval=`cat polarity_mode`
+     curval="."; title="_"     
+     if   [ -e polarity_mode ] ; then
+        curval=`cat polarity_mode`
+        title="polarity_mode:" 
+     elif [ -e polarity ] ; then
+        curval=`cat polarity`
+        title="polarity:" 
+     fi
      polval=$curval
-     line3_2=`printf "%-21s %12s\n"  "polarity_mode:"         "$curval"`
+     line3_2=`printf "%-21s %12s\n"  "${title}" "$curval"`
+      
+     curval="."; title="_"     
+     if [ -e position ] ; then
+        curval=`cat position` 
+        title="position:"
+     fi
+     line4_2=`printf "%-21s %12s\n"  "${title}" "$curval"`
+
+     curval="."; title="_"     
+     if [ -e position_mode ] ; then
+        curval=`cat position_mode` 
+        title="position_mode:"
+     fi
+     line5_2=`printf "%-21s %-50s\n" "${title}" "$curval"`
+
+     curval="."; title="_"     
+     if [ -e regulation_mode ] ; then 
+        curval=`cat regulation_mode` 
+        title="regulation_mode:"  
+     fi
+     line6_2=`printf "%-21s %12s\n"  "${title}" "$curval"`
+
+     curval="."; title="_"     
+     if [ -e run_mode ] ; then
+         curval=`cat run_mode`
+         title="run_mode:"
+     elif [ -e command ]; then
+         curval=`cat command`  
+         title="command:"
+     fi
+     line7_2=`printf "%-21s %12s\n"  "${title}" "$curval"`
      
-     curval=`cat position`
-     line4_2=`printf "%-21s %12d\n"  "position:"              "$curval"`
-
-     curval=`cat position_mode`
-     line5_2=`printf "%-21s %-50s\n" "position_mode:"         "$curval"`
-
-     curval=`cat regulation_mode`
-     line6_2=`printf "%-21s %12s\n"  "regulation_mode:"       "$curval"`
-
-     curval=`cat run_mode`
-     line7_2=`printf "%-21s %12s\n"  "run_mode:"              "$curval"`
-
-     curval=`cat state`
-     line8_2=`printf "%-21s %s\n"    "state:"                 "$curval"`
-
-     curval=`cat stop_mode`
-     line9_2=`printf "%-21s %12s\n"  "stop_mode:"             "$curval"`
+     curval="-"; title="_"      
+     if [ -e state ] ; then 
+        curval=`cat state` 
+        title="state:"
+     fi
+     state=$curval
+     line8_2=`printf "%-21s %s\n"    "${title}" "$curval"`
+     
+     curval="-"; title="_"      
+     if [ -e stop_mode ] ; then
+        curval=`cat stop_mode` 
+        title="stop_mode:"
+     fi
+     line9_2=`printf "%-21s %12s\n"  "${title}"  "$curval"`
      line10_2="_ ."     
      
-     curval=`cat run`
-     line1_3=`printf "%-21s %8d\n"   "run:"                   "$curval"`
+#    If duty_cycle on dc-motor present as speed     
+     curval="."; title="_"; duty_cycle=0
+     if [ -e duty_cycle ]; then
+        curval=`cat duty_cycle` 
+        title="duty_cycle:"
+        duty_cycle=$curval
+     fi     
+     line1_2=`printf "%-21s %12s\n"  "${title}" "$curval"`
 
-     curval=`cat estop`
-     line2_3=`printf "%-21s %8d\n"   "estop:"                 "$curval"`
 
-     curval=`cat speed_regulation_D`
-     line3_3=`printf "%-21s %8d\n"   "speed_regulation_D:"    "$curval"`
-
-     curval=`cat speed_regulation_I`
-     line4_3=`printf "%-21s %8d\n"   "speed_regulation_I:"    "$curval"`
-
-     curval=`cat speed_regulation_K`
-     line5_3=`printf "%-21s %8d\n"   "speed_regulation_K:"    "$curval"`
-
-     curval=`cat speed_regulation_P`
-     line6_3=`printf "%-21s %8d\n"   "speed_regulation_P:"    "$curval"`
+     curval="-"; title="_"; runval=0     
+     if [ -e run ] ; then 
+       curval=`cat run` 
+       runval=$curval
+       title="run"
+     fi
+     line1_3=`printf "%-21s %8s\n"   "${title}" "$curval"`
+     
+     if [ $runval == 0 ]; then 
+        runval=$duty_cycle 
+     fi
+     set +x
+     
+     curval="-"; title="_"      
+     if [ -e estop ] ; then
+        curval=`cat estop` 
+        title="estop:"
+     fi
+     line2_3=`printf "%-21s %8s\n"   "${title}" "$curval"`
+     
+     curval="-"; title="_"      
+     if [ -e speed_regulation_D ] ; then 
+        curval=`cat speed_regulation_D`  
+        title="speed_regulation_D:"
+     fi
+     line3_3=`printf "%-21s %8s\n"   "${title}" "$curval"`
+     
+     curval="-"; title="_"      
+     if [ -e speed_regulation_I ] ; then
+         curval=`cat speed_regulation_I` 
+         title="speed_regulation_I:"
+     fi
+     line4_3=`printf "%-21s %8s\n"   "${title}" "$curval"`
+     
+     curval="-"; title="_"      
+     if [ -e speed_regulation_K ] ; then
+        curval=`cat speed_regulation_K` 
+        title="speed_regulation_K:"  
+     fi
+     line5_3=`printf "%-21s %8s\n"   "${title}" "$curval"`
+     
+     curval="-"; title="_"      
+     if [ -e speed_regulation_P ] ; then
+        curval=`cat speed_regulation_P` 
+        title="speed_regulation_P:" 
+     fi
+     line6_3=`printf "%-21s %8s\n"   "${title}" "$curval"`
      # type  already in top of the display
      curval=`cat uevent`
-     line7_3=`printf "%-20s %s\n"    "uevent:"                "$curval"`
+     line7_3=`printf "%-20s %s\n"    "uevent:"  "$curval"`
      
      line8_3="_ ."
      line9_3="_ ."     
      tabc=$brblue
      # Long string....
-     curval=`cat stop_modes`
-     line10_1=`printf "$tabc%-21s $white%s\n"   "stop_modes:" "$curval"`
-     echo " "
-     printf "$brwhite%32s %32s %32s$white\n" "  == setpoints ==  " "  == state     ==  " "  == switches  ==" 
-     runval=`cat run`
-     if [ "$runval" == 0 ]        ; then runcol=${red}
-                                    else runcol=${brgreen} 
+     curval="."; title="_" 
+     if [ -e stop_modes ]; then
+        curval=`cat stop_modes`
+        title="stop_modes:"
+     elif [ -e commands ]; then
+        curval=`cat commands`
+        title="commands:"
      fi
-     if [ "$encval" != "normal" ] ; then enccol=${red}
-                                    else enccol=${brgreen} 
+     line10_1=`printf "$tabc%-21s $white%s\n" "${title}"  "$curval"`
+     
+     printf "\n$brwhite%32s %32s %32s$white\n" "  == setpoints ==  " "  == state     ==  " "  == switches  ==" 
+     # 
+     if   [ attribute == "dc" ]     ; then
+        echo "set duty_cycle as speed"
      fi
-     if [ "$polval" != "normal" ] ; then polcol=${red}
-                                    else polcol=${brgreen} 
+     
+     if   [ "$runval" == 0 ]        ; then runcol=${red}
+     else                                  runcol=${brgreen} 
      fi
-     printf "$tabc%-21s $white%8s $brwhite|$white $tabc%-18s $white%11s $brwhite|$white $tabc%-21s $runcol%10s\n"  $line1_1 $line1_2 $line1_3
+
+     if   [ "$encval" == "normal" ] ; then enccol=${brgreen}
+     elif [ "$encval" == "."      ] ; then enccol=${blue}
+     else                                  enccol=${red} 
+     fi
+
+     if   [ "$polval" == "normal" ] ; then polcol=${brgreen}  
+     elif [ "$polval" == "."      ] ; then polcol=${blue}  
+                                      else polcol=${red}
+     fi
+     
+     printf "$tabc%-21s $white%8s $brwhite|$white $tabc%-18s $runcol%11s $brwhite|$white $tabc%-21s $runcol%10s\n"  $line1_1 $line1_2 $line1_3
      printf "$tabc%-21s $white%8s $brwhite|$white $tabc%-18s $white%11s $brwhite|$white $tabc%-21s $white%10s\n"  $line2_1 $line2_2 $line2_3
      printf "$tabc%-21s $enccol%8s $brwhite|$white $tabc%-18s $polcol%11s $brwhite|$white $tabc%-21s $white%10s\n"  $line3_1 $line3_2 $line3_3 
      printf "$tabc%-21s $white%8s $brwhite|$white $tabc%-18s $white%11s $brwhite|$white $tabc%-21s $white%10s\n"  $line4_1 $line4_2 $line4_3 
      printf "$tabc%-21s $white%8s $brwhite|$white $tabc%-18s $white%11s $brwhite|$white $tabc%-21s $white%10s\n"  $line5_1 $line5_2 $line5_3 
      printf "$tabc%-21s $white%8s $brwhite|$white $tabc%-18s $white%11s $brwhite|$white $tabc%-21s $white%10s\n"  $line6_1 $line6_2 $line6_3 
-     printf "$tabc%-21s $white%8s $brwhite|$white $tabc%-18s $white%11s $brwhite|$white $tabc%-21s $white%10s\n"  $line7_1 $line7_2 $line7_3 
+     printf "$tabc%-21s $white%8s $brwhite|$white $tabc%-18s $white%11s $brwhite|$white $tabc%-21s $white%10s\n"  $line7_1 $line7_2 "`echo -n $line7_3`" 
      printf "$tabc%-21s %8s $brwhite|$white $tabc%-18s $runcol%11s $brwhite|$white $tabc%-21s %10s\n"  $line8_1 $line8_2 $line8_3 
      printf "$tabc%-21s %8s $brwhite|$white $tabc%-18s $white%11s $brwhite|$white $tabc%-21s %10s\n"  $line9_1 $line9_2 $line9_3 
      #
      echo -e $line10_1 # 10_2 and 10_3 not used. 
      echo ""
-
+     
   else
     echo "does not exist entry $i  ${tachoPath[$i]}  " 
   fi 
