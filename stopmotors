@@ -24,10 +24,11 @@
 
 #
 showmotor () {
+      runfilename=${1:-run}
       if [ $motorpower -eq 0 ]; then motorcolor=$brgreen
                                 else motorcolor=$brred
       fi
-      echo -e "$motorcolor`cat $MOTORPATH/run`$brwhite"
+      printf  "${motorcolor}%3s$brwhite" "`cat $MOTORPATH/$runfilename`"
 }
 
 #
@@ -71,16 +72,28 @@ for m in /sys/class/tacho-motor/motor*
     fi
   done
   
-  # ??         /sys/devices/platform/legoev3-ports/
-  # =================================
-  set -x
-  for m in /sys/devices/platform/legoev3-ports/out*
+  # ================================
+           
+  for m in /sys/class/dc-motor/motor*/
   do
     MOTORPATH="$m"
     if [ -e $MOTORPATH ]; then
-      printf "%-40s %-6s " "$MOTORPATH/run" "status" 
+      printf "%-40s %-6s " "${MOTORPATH}duty_cycle" "status" 
+      
+      # report status before reset
+      motorpower=`cat ${MOTORPATH}duty_cycle`
+      printf "$brblue %-6s $brwhite%3s " "before" "`showmotor duty_cycle`" 
+      
+#      # echo to duty_cycle DOES not work????? so set command to coast
+#      echo "coast" > ${MOTORPATH}command
+
+      # set back to zero:
+      echo  -100 > "${MOTORPATH}duty_cycle"
+      echo   0 > "${MOTORPATH}duty_cycle"
+
+      # report status after reset
+      motorpower=`cat ${MOTORPATH}duty_cycle`
+      printf "$brblue %-6s $brwhite%-3s\n" "after" "`showmotor duty_cycle`"
     fi      
-    # motormode="rcx-motor"
-    # motordir="dc-motor"
     # controldir=`find /sys/class/${motordir} -name "motor*"`
   done
