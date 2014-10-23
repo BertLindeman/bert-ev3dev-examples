@@ -15,7 +15,8 @@
 # Date     By       Description
 # 20140907 BL       Use centralized functions
 # 20140916 BL       Do not use fixed number suffix on tacho-motor#
-#
+# 20141022 BL       Add rxc-motor and rxc-led
+#                   Adapt to "force motor driver"
 #============================================================================
 
 
@@ -27,12 +28,12 @@ showmotor () {
                                 else motorcolor=$brred
       fi
       echo -e "$motorcolor`cat $MOTORPATH/run`$brwhite"
-      #echo -e "${motorcolor}255"
 }
 
+#
+# "old" directory name before kernel 3.16.1-6:
 for m in /sys/class/tacho-motor/tacho-motor*
   do
-   # MOTORPATH="/sys/class/tacho-motor/tacho-motor$m"
     MOTORPATH="$m"
     if [ -e $MOTORPATH ]; then
       printf "%-40s %-6s " "$MOTORPATH/run" "status" 
@@ -50,3 +51,36 @@ for m in /sys/class/tacho-motor/tacho-motor*
     fi
   done
 #  
+# "new" directory name starting at kernel 3.16.1-6:
+for m in /sys/class/tacho-motor/motor*
+  do
+    MOTORPATH="$m"
+    if [ -e $MOTORPATH ]; then
+      printf "%-40s %-6s " "$MOTORPATH/run" "status" 
+      
+      # report status before reset
+      motorpower=`cat $MOTORPATH/run`
+      printf "$brblue %-6s $brwhite%3s " "before" "`showmotor`" 
+
+      # set back to zero:
+      echo   0 > "$MOTORPATH/run"
+
+      # report status after reset
+      motorpower=`cat $MOTORPATH/run`
+      printf "$brblue %-6s $brwhite%-3s\n" "after" "`showmotor`"
+    fi
+  done
+  
+  # ??         /sys/devices/platform/legoev3-ports/
+  # =================================
+  set -x
+  for m in /sys/devices/platform/legoev3-ports/out*
+  do
+    MOTORPATH="$m"
+    if [ -e $MOTORPATH ]; then
+      printf "%-40s %-6s " "$MOTORPATH/run" "status" 
+    fi      
+    # motormode="rcx-motor"
+    # motordir="dc-motor"
+    # controldir=`find /sys/class/${motordir} -name "motor*"`
+  done

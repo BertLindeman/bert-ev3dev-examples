@@ -20,6 +20,8 @@
 #                     this led and for it's trigger
 #                   o adapt usage clause (no parameters)
 # 20140914 BL       Color for some values
+# 20141023 BL       o Since 3.16.1-6 also PF-leds possible
+#                   o move show[LED]trigger to ev3dev_functions 
 #============================================================================
 
 
@@ -40,31 +42,32 @@ declare _A triggerArr
 declare _A triggerCol
 declare _A delayON
 declare _A delayOFF
+declare _A portix
 
-showLEDtrigger () {
- # echo "showing trigger from $1"
- for word in `cat $1` ;
-  do
-    delim=${word:0:1}${word:${#word}-1:1}
-    if [ $delim == "[]" ]; then
-      trigger=${word:1:${#word}-2}
-      break # do not search further
-    else
-      trigger=$word  
-    fi
-  done
-  currenttrigger=$trigger 
-  if [ $currenttrigger == "none" ]; then triggercol=$white
-                                    else triggercol=$brblue
-  fi                                   
-}
+#showLEDtrigger () {
+# # echo "showing trigger from $1"
+# for word in `cat $1` ;
+#  do
+#    delim=${word:0:1}${word:${#word}-1:1}
+#    if [ $delim == "[]" ]; then
+#      trigger=${word:1:${#word}-2}
+#      break # do not search further
+#    else
+#      trigger=$word  
+#    fi
+#  done
+#  currenttrigger=$trigger 
+#  if [ $currenttrigger == "none" ]; then triggercol=$white
+#                                    else triggercol=$brblue
+#  fi                                   
+#}
 
 for side in left right ;
 do
   for ledcolor in red green ; 
   do
     if [ $ledcolor == "red"  ]; then icol=0  ; else icol=1 ;  fi      
-    if [ $side  == "left" ]; then iside=0 ; else iside=1;  fi      
+    if [ $side     == "left" ]; then iside=0 ; else iside=1;  fi      
      
     ledbase="/sys/class/leds/ev3:$ledcolor:$side"
     ledbrightness="$ledbase/brightness"
@@ -74,9 +77,13 @@ do
 
     brightness=$(echo "`cat $ledbrightness`")
     brightnessArr[$icol$iside]=$brightness
-    showLEDtrigger $ledtriggerpath
+
+    showtrigger "`cat $ledtriggerpath`"
     triggerArr[$icol$iside]=${currenttrigger:0:40}
-    triggerCol[$icol$iside]=$triggercol # ${triggercol}
+    if [ $currenttrigger == "none" ]; then triggerCol[$icol$iside]=$white
+                                      else triggerCol[$icol$iside]=$brblue
+    fi                      
+    # triggerCol[$icol$iside]=$triggercol 
     if [ -e "$delay_onpath" ];  then  delayON[$icol$iside]=$(echo "`cat $delay_onpath`")
     else                              delayON[$icol$iside]="."
     fi
@@ -88,10 +95,10 @@ done
 
 # clear
 
-  echo -e "Report from `dirname ${ledbase}`  ev3:{${red}red,${green}green${white}}:{left,right} "
+  echo -e "Report from `dirname ${ledbase}`  ev3:{${red}red,${green}green${white}}:{left,right}\n"
   # header
   printf "$brwhite%-6s %-11s %10s %8s %8s %-40s$white\n" "color" "Side"        "Brightness" " dly_ON" "dly_OFF" "trigger"
-  printf "$brwhite%-6s %-11s %10s %8s %8s %-40s$white\n" "-----" "-----------" "----------" " ------" "-------" "-------"
+  printf "$brwhite%-6s %-11s %10s %8s %8s %-40s$white\n" "/port" "-----------" "----------" " ------" "-------" "-------"
 
   for side in left right ;
   do  
@@ -110,11 +117,11 @@ done
       if [ ${brightnessArr[$icol$iside]} == "0" ]; then brightnessCol=$white
                                                    else brightnessCol=$brgreen
       fi
-      if [ ${delayON[$icol$iside]} == "0" ]; then delay_onCol=$white
-                                             else delay_onCol=$brgreen
+      if [ ${delayON[$icol$iside]}       == "0" ]; then delay_onCol=$white
+                                                   else delay_onCol=$brgreen
       fi
-      if [ ${delayOFF[$icol$iside]} == "0" ]; then delay_offCol=$white
-                                              else delay_offCol=$brgreen
+      if [ ${delayOFF[$icol$iside]}      == "0" ]; then delay_offCol=$white
+                                                   else delay_offCol=$brgreen
       fi
       printf "`eval echo $curColor`%-6s ${white}%${sidealign}11s ${brightnessCol}%10s$white ${delay_onCol}%8s$white ${delay_offCol}%8s$white ${triggerCol[$icol$iside]}%-40s\n" \
       "$ledcolor" \
@@ -125,5 +132,94 @@ done
       "${triggerArr[$icol$iside]}" 
     done
   done 
+
+#  PF and rcx leds:
+  for port in /sys/class/leds/ev3::out*
+  do     
+     # echo "path port:${port}"
+     echo ""
+     outport=`basename ${port}`
+     curColor=${brwhite}
+     # fake led color and side 
+     
+     iside=0       
+     # set empty:
+     icol2=""
+     icol3=""
+     icol4=""
+     icol5=""     
+     case $outport in
+      "ev3::outA") icol2=2
+                   icol=2
+                   portix[$icol$iside]="outA"
+              ;; 
+      "ev3::outB") icol3=3  
+                   icol=3  
+                   portix[$icol$iside]="outB"
+              ;; 
+      "ev3::outC") icol4=4
+                   icol=4    
+                   portix[$icol$iside]="outC"
+              ;; 
+      "ev3::outD") icol5=5
+                   icol=5    
+                   portix[$icol$iside]="outD"
+              ;; 
+      *)
+              echo "Unrecognized output port: \"${outport}\" from ${port}"
+              exit
+              ;;
+     esac      
+        
+     ledbase="/sys/class/leds/$outport"
+     ledbrightness="$ledbase/brightness"
+     delay_onpath="$ledbase/delay_on"
+     delay_offpath="$ledbase/delay_off"
+
+     ledtriggerpath="$ledbase/trigger"
+     showtrigger "`cat $ledtriggerpath`"
+     triggerArr[$icol$iside]=${currenttrigger:0:40}
+ 
+     brightnessArr[$icol$iside]=$(echo "`cat $ledbrightness`")
+ 
+     if [ $currenttrigger == "none" ]; then triggerCol[$icol$iside]=$white
+                                       else triggerCol[$icol$iside]=$brblue
+     fi                      
+     # triggerCol[$icol$iside]=$triggercol 
+     if [ -e "$delay_onpath" ];  then  delayON[$icol$iside]=$(echo "`cat $delay_onpath`")
+     else                              delayON[$icol$iside]="."
+     fi
+     if [ -e "$delay_offpath" ]; then delayOFF[$icol$iside]=$(echo "`cat $delay_offpath`")
+     else                             delayOFF[$icol$iside]="."
+     fi
+     
+  done
+
+  sidealign="-"  # align left
+  for side in $icol2 $icol3 $icol4 $icol5
+  do  
+      # echo "Looping through PF leds side;$side \"$icol2\" \"$icol3\" \"$icol4\" \"$icol5\""
+      curside=""
+      if [ ${brightnessArr[$icol$iside]} == "0" ]; then brightnessCol=$white
+                                                   else brightnessCol=$brgreen
+      fi
+      if [ ${delayON[$icol$iside]} == "0" ]; then delay_onCol=$white
+                                             else delay_onCol=$brgreen
+      fi
+      if [ ${delayOFF[$icol$iside]} == "0" ]; then delay_offCol=$white
+                                              else delay_offCol=$brgreen
+      fi
+      
+      portname="${portix[$icol$iside]}"
+
+      printf "${brgreen}%-6s ${white}%${sidealign}11s ${brightnessCol}%10s$white ${delay_onCol}%8s$white ${delay_offCol}%8s$white ${triggerCol[$icol$iside]}%-40s\n" \
+      "$portname" \
+      "$curside" \
+      "${brightnessArr[$icol$iside]}" \
+      "${delayON[$icol$iside]}" \
+      "${delayOFF[$icol$iside]}" \
+      "${triggerArr[$icol$iside]}" 
+  done 
+
   echo -e " ${endColor} " # back to normal
   

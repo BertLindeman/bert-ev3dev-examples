@@ -20,6 +20,7 @@
 #                   o slightly different file names
 #                   o motor type -> device_type
 #                   o issue 123: force mode to input ports and output ports
+# 20141020 BL       o adapt to motor mappings (kernel 3.16.1-6)
 
 . /usr/local/bin/bert_ev3dev_functions
 
@@ -27,8 +28,6 @@
  haveportsout=""  
 
 findstr=`find /sys/devices/platform/legoev3-ports/ -maxdepth 2 -name "in[1234]\:*" `
-#
-#  echo -e "find2 result:\n$findstr\n"
 #
 for p in $findstr
 do 
@@ -51,8 +50,8 @@ do
     haveportsin="$haveportsin $inportnumber"
     
       Arrindir[$inportnumber]=${dirname}
-     Arrinmode[$inportnumber]=${driver_mode}
-    Arrinstate[$inportnumber]=${driver_state}
+  Arrindrvmode[$inportnumber]=${driver_mode}
+ Arrindrvstate[$inportnumber]=${driver_state}
      Arrinport[$inportnumber]=${porttype1}                #${inportnumber} 
      Arrintype[$inportnumber]=${porttype2}
      Arrinbase[$inportnumber]=${basename}
@@ -87,14 +86,23 @@ do
   
 done
 
-##  motorports are deeper in the directory tree
-##    findstr=`find /sys/devices/platform/legoev3-ports/ -name "tacho-motor[[:digit:]]*"`
-##    echo -e "find result:\n$findstr\n"
+# findstr=`find /sys/devices/platform/legoev3-ports/ -maxdepth 2 -name "in[1234]\:*" -o  -name "out[ABCD]*" -name "*\:*"`
+findstr=`/bin/ls -d /sys/class/tacho-motor/tacho-motor*/ 2>/dev/null` # before kernel 3.16.1-6
+if [ $? == 0 ]; then
+   findstr=`/bin/ls -d /sys/class/tacho-motor/tacho-motor*/`
+else                                                                  # at kernel 3.16.1-6 and later
+   set +e
+   findstr=`/bin/ls -d /sys/class/*motor/motor*/    2>/dev/null`
+   findled=`/bin/ls -d /sys/class/leds/ev3::out*/   2>/dev/null`
+   set -e
+fi   
 
-
-findstr=`/bin/ls -d /sys/class/tacho-motor/tacho-motor*/  `
-#  echo -e "find2 result:\n$findstr\n"
-# and what about /sys/class/tacho-motor/tacho-motor*/
+# sofar found 3 motor types:
+# /bin/ls -ld /sys/class/dc-motor/motor*/    2>/dev/null
+# /bin/ls -ld /sys/class/tacho-motor/motor*/ 2>/dev/null 
+# /bin/ls -ld /sys/class/servo-motor/motor*/ 2>/dev/null
+#
+# should include: /sys/class/leds/ev3::out%
 
 # need to declare the arrays (Otherwise the index e.g. C is reported unbound..)
 
@@ -105,32 +113,62 @@ declare -A Arroutctlpath=( [A]=a [B]=b [C]=c [D]=d )
 declare -A Arrouttype=(    [A]=a [B]=b [C]=c [D]=d )
 declare -A Arroutrun=(     [A]=a [B]=b [C]=c [D]=d )
 declare -A Arroutstate=(   [A]=a [B]=b [C]=c [D]=d )
+declare -A Arroutdrvmode=( [A]=a [B]=b [C]=c [D]=d )
+declare -A Arroutdrvstate=([A]=a [B]=b [C]=c [D]=d )
+# 
 
-for p in $findstr
-do 
+#for p in ${findled}
+for p in $findstr ${findled}
+do
+  # determine motortype
   basename="`basename $p`" 
-  dirname="`dirname $p`"
-  
-  # split basename before and after ":"
-  porttype1="${basename%%:*}"
-  porttype2="${p#*:}"
+  dirname="`dirname $p`" 
+  dir3="`basename ${dirname}`" # third node in path
+
+  if stringcontains '::' "${basename}" ;  then # led-type 
+  echo "================== got :: in ${basename}"
+    porttype1="${basename%%::*}" # double ::
+    porttype2="${p#*::}"
+    portname="${porttype2:0:4}"    
+  else
+    porttype1="${basename%%:*}"
+    porttype2="${p#*:}"
+    portname="`cat $p/port_name`"
+  fi  
   #
-  device_type="`cat $p/type`"
-  portname="`cat $p/port_name`"
-  outportletter=${portname:3} # out%
+  # portname="`cat $p/port_name`"
+  outportletter=${portname:3:1} # out%
+  #
+  driver_mode="`cat /sys/devices/platform/legoev3-ports/$portname/mode`"
+  driver_state="`cat /sys/devices/platform/legoev3-ports/$portname/state`"
+  #
+  
+  Arroutdrvmode[$outportletter]=${driver_mode}
+ Arroutdrvstate[$outportletter]=${driver_state}
   haveportsout="$haveportsout $outportletter"
      Arroutbase[$outportletter]=${basename}
       Arroutdir[$outportletter]="/sys/devices/platform/legoev3-ports/"${portname}
      Arroutport[$outportletter]=${portname} # out%
-  
+ 
   inlvl1=`echo $p`
   Arroutctlpath[$outportletter]=`echo -e ${green}${inlvl1}$brwhite`
-  
+  if [ "${dir3}" == "dc-motor" ]; then
+     Arrouttype[$outportletter]="dc-motor"
+      Arroutrun[$outportletter]="`cat ${inlvl1}/duty_cycle`"
+    Arroutstate[$outportletter]="`cat ${inlvl1}/command`" 
+  elif [ "${dir3}" == "leds" ]; then
+     Arrouttype[$outportletter]="led"
+      Arroutrun[$outportletter]="`cat ${inlvl1}/brightness`"
+      showtrigger "`cat ${inlvl1}/trigger`" 
+    Arroutstate[$outportletter]="${currenttrigger}" 
+  else
      Arrouttype[$outportletter]="`cat ${inlvl1}/type`"
       Arroutrun[$outportletter]="`cat ${inlvl1}/run`"
     Arroutstate[$outportletter]="`cat ${inlvl1}/state`" 
+  fi  
 done  
 
+set +x
 # Report input ports:
 if [ "$haveportsin" != "" ]; then
   echo -e "\n$brblue  Input ports recognized:\n"
@@ -138,7 +176,7 @@ if [ "$haveportsin" != "" ]; then
   
   for i in $haveportsin;  do
      printf     "%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n" "${Arrinport[$i]}"   " " " " "${Arrinsensormode[$i]}" "${Arrinpoll[$i]}" "${Arrinfw[$i]}" " " "${Arrinctlpath[$i]}" 
-     printf     "%4s %-10s %-10s %-15s %-3s %-11s %-25s ${green}%-25s$brwhite\n\n" " " "${Arrinmode[$i]}" "${Arrinstate[$i]}"  " " " " " " "${Arrinbase[$i]}" "${Arrindir[$i]}"
+     printf     "%4s %-10s %-10s %-15s %-3s %-11s %-25s ${green}%-25s$brwhite\n\n" " " "${Arrindrvmode[$i]}" "${Arrindrvstate[$i]}"  " " " " " " "${Arrinbase[$i]}" "${Arrindir[$i]}"
   done
 fi
 
@@ -150,6 +188,6 @@ if [ "$haveportsout" != "" ]; then
   
   for i in $haveportsout;  do
     printf      "%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n" "${Arroutport[$i]}" " " " " "${Arrouttype[$i]}" "${Arroutrun[$i]}" "${Arroutstate[$i]}"  "${Arroutbase[$i]}" "${Arroutctlpath[$i]}"
-    printf      "%84s ${green}%-25s$brwhite\n\n" " " "${Arroutdir[$i]}"
+    printf      "%4s %-10s %-10s %-15s %-3s %-11s %-25s ${green}%-25s$brwhite\n\n" " " "${Arroutdrvmode[$i]}" "${Arroutdrvstate[$i]}" " " " " " " " " "${Arroutdir[$i]}"
   done
 fi

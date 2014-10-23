@@ -21,7 +21,7 @@
 #
 #============================================================================
 
-
+. /usr/local/bin/bert_ev3dev_functions
 
 #
 #  get parameters and translate to lowercase:
@@ -46,22 +46,22 @@ usageEXIT () {
 
 #set -v -x
 
-showLEDtrigger () {
- # echo "showing trigger from $1"
- for word in `cat $1` ;
-  do
-    delim=${word:0:1}${word:${#word}-1:1}
-    if [ $delim == "[]" ]; then
-      trigger=${word:1:${#word}-2}
-      # echo "current trigger now: $trigger"
-      break # do not search further
-    else
-      trigger=$word  
-    fi
-  done
-  currenttrigger=$trigger
-  echo "  current trigger=$currenttrigger" 
-}
+#showLEDtrigger () {
+# # echo "showing trigger from $1"
+# for word in `cat $1` ;
+#  do
+#    delim=${word:0:1}${word:${#word}-1:1}
+#    if [ $delim == "[]" ]; then
+#      trigger=${word:1:${#word}-2}
+#      # echo "current trigger now: $trigger"
+#      break # do not search further
+#    else
+#      trigger=$word  
+#    fi
+#  done
+#  currenttrigger=$trigger
+#  echo "  current trigger=$currenttrigger" 
+# }
 
 verifyLEDtrigger () {
   for word in `cat $2` ;
@@ -152,14 +152,14 @@ verifyLEDtrigger () {
  
  if [ $command == "cat" ]; then
    echo "  brightness=`cat $ledbrightness`"
-   showLEDtrigger $ledtriggerpath
+   showtrigger "`cat $ledtriggerpath`"
  else
    echo "BEFORE:"
    echo "  brightness=`cat $ledbrightness`"
-   showLEDtrigger $ledtriggerpath
+
+   showtrigger "`cat $ledtriggerpath`"
    
    # echo "setting trigger to $tosetTrigger > $ledtriggerpath"
-   # showLEDtrigger $ledtriggerpath
    if [ "$p4" != "" ]; then
      echo $tosetTrigger > $ledtriggerpath 
      if [ $? -ne 0 ]; then
@@ -174,5 +174,5 @@ verifyLEDtrigger () {
    fi  
    echo "AFTER:"
    echo "  brightness=`cat $ledbrightness`"
-   showLEDtrigger $ledtriggerpath
+   showtrigger "`cat $ledtriggerpath`"
  fi    
