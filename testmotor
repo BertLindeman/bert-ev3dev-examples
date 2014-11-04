@@ -2,8 +2,8 @@
 # Script_name     : testmotor
 # Author          : Bert Lindeman
 # Description     : Fiddle a bit with a connected motor
-# Version         : v1.2
-# Date            : 2014-08-26
+# Version         : v1.3
+# Date            : 2014-11-04
 # Usage           : testmotor
 # Notes           : One parameter (optional): the number of the tacho-motor
 #                   to be exercised.
@@ -14,10 +14,11 @@
 #
 # Changelog        
 # Date     By       Description
-# 20140826 BL       o add script header
-#                   o check for missing or too many argument(s)
+# 20141104 BL       prepare for release v1.3
 # 20140914 BL       o Add new attribute (3.16.1) encoder_mode
 #                   o small cleanup
+# 20140826 BL       o add script header
+#                   o check for missing or too many argument(s)
 #
 #============================================================================
 

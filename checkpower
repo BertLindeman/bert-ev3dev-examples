@@ -4,8 +4,8 @@
 # Description     : Check the battery voltage and warn if the voltage is 
 #                   less than 7 volts,
 #                   also set the left EV3 led to blinking green, amber or red.
-# Version         : v1.2
-# Date            : 2014-08-26
+# Version         : v1.3
+# Date            : 2014-11-04
 # Usage           : checkpower 
 #                   No arguments needed nor used
 # Notes           : ! TOBE verified: At what voltage does the brick shutdown.
@@ -20,11 +20,7 @@
 #
 # Changelog       :
 # Date     By       Description
-# 20140826 BL       o Add header
-#                   o Do not ALWAYS state that power is "OK"
-#                     but show the status WARN / MED / LOW / OK
-#                   o whole algorithm did NOT work :-(
-#                   o Check if ENVIRONMENT variable is set.
+# 20141104 BL       prepare for release v1.3
 # 20140827 BL       o 6 volts is just a bit too low as last warning level
 #                     Last drop of voltage e.g. was too much
 #                     from 6303066 to 5668733 in 10 minutes (my check interval)
@@ -33,6 +29,11 @@
 # 20140914 BL       o add the voltage to the blinkvoltage call,
 #                     to adapt the type of blinking.
 #                     Since kernel 3.16.1 leds can be controlled better.
+# 20140826 BL       o Add header
+#                   o Do not ALWAYS state that power is "OK"
+#                     but show the status WARN / MED / LOW / OK
+#                   o whole algorithm did NOT work :-(
+#                   o Check if ENVIRONMENT variable is set.
 #============================================================================
 
 

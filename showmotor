@@ -2,8 +2,8 @@
 # Script_name     : showmotor
 # Author          : Bert Lindeman
 # Description     : Show status of connected motors
-# Version         : v1.2
-# Date            : 2014-08-26
+# Version         : v1.3
+# Date            : 2014-11-04
 # Usage           : showmotor
 # Notes           : Only tested with LEGO EV3 and NXT motors
 # Copyright       : 2014 Bert Lindeman
@@ -13,9 +13,10 @@
 #
 # Changelog        
 # Date     By       Description
-# 20140826 BL       Add script header
-# 20140911 BL       adapt to changes at kernel 3.16.1-2
+# 20141104 BL       prepare for release v1.3
 # 20141023 BL       adapt to changes at kernel 3.16.1-6
+# 20140911 BL       adapt to changes at kernel 3.16.1-2
+# 20140826 BL       Add script header
 #============================================================================
 # 
 # 

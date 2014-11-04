@@ -2,8 +2,8 @@
 # Script_name     : blinkvoltage
 # Author          : Bert Lindeman
 # Description     : Set the left EV3-led according to the battery voltage
-# Version         : v1.1
-# Date            : 2014-08-26
+# Version         : v1.3
+# Date            : 2014-11-04
 # Usage           : blinkvoltage [color]
 # Notes           : o color is [ none | red | green | amber ]
 #                   o very good to add this script to a crontab
@@ -15,9 +15,10 @@
 #
 # Changelog        
 # Date     By       Description
+# 20141104 BL       prepare for release v1.3
+# 20140914 BL       Also use the actual voltage to set the blinkling
 # 20140826 BL       o Add script header
 #                   o try to prevent abmber blinking flipflop red/green
-# 20140914 BL       Also use the actual voltage to set the blinkling
 #============================================================================
 
 

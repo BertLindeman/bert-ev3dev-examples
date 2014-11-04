@@ -2,8 +2,8 @@
 # Script_name     : showsound
 # Author          : Bert Lindeman
 # Description     : Show info about EV3 sound
-# Version         : v1.1
-# Date            : 2014-08-26
+# Version         : v1.3
+# Date            : 2014-11-04
 # Usage           : showsound
 # Notes           : o No parameters used
 #                   o Do not confuse with sound-SENSOR
@@ -14,8 +14,9 @@
 #
 # Changelog        
 # Date     By       Description
-# 20140826 BL       Add script header
+# 20141104 BL       prepare for release v1.3
 # 20140907 BL       Use centralized functions
+# 20140826 BL       Add script header
 #============================================================================
 
 
