@@ -21,6 +21,8 @@
 #                   o motor type -> device_type
 #                   o issue 123: force mode to input ports and output ports
 # 20141020 BL       o adapt to motor mappings (kernel 3.16.1-6)
+#                   o add rcx leds and motors
+# 20141104 BL       Take terminal-width into account
 
 . /usr/local/bin/bert_ev3dev_functions
 
@@ -117,8 +119,7 @@ declare -A Arroutdrvmode=( [A]=a [B]=b [C]=c [D]=d )
 declare -A Arroutdrvstate=([A]=a [B]=b [C]=c [D]=d )
 # 
 
-#for p in ${findled}
-for p in $findstr ${findled}
+for p in ${findstr} ${findled}
 do
   # determine motortype
   basename="`basename $p`" 
@@ -169,25 +170,62 @@ do
 done  
 
 set +x
-# Report input ports:
-if [ "$haveportsin" != "" ]; then
-  echo -e "\n$brblue  Input ports recognized:\n"
-  printf "$brblue%4s %-10s %-10s %-14s %-4s %-11s %-25s %s\n$brwhite" "Port" "drv-mode" "drv-state" "sensor mode" "Poll" "fwVer" "Basename" "Control directory"
-  
-  for i in $haveportsin;  do
-     printf     "%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n" "${Arrinport[$i]}"   " " " " "${Arrinsensormode[$i]}" "${Arrinpoll[$i]}" "${Arrinfw[$i]}" " " "${Arrinctlpath[$i]}" 
-     printf     "%4s %-10s %-10s %-15s %-3s %-11s %-25s ${green}%-25s$brwhite\n\n" " " "${Arrindrvmode[$i]}" "${Arrindrvstate[$i]}"  " " " " " " "${Arrinbase[$i]}" "${Arrindir[$i]}"
-  done
-fi
+# take screenwidth into account:
+scrwidth=`tput cols`
+if [ $scrwidth -ge 130 ]; then
 
-# Report motorports:
+ # Report input ports:
+ if [ "$haveportsin" != "" ]; then
+   echo -e "\n$brblue  Input ports recognized:\n"
+   printf "$brblue%4s %-10s %-10s %-14s %-4s %-11s %-25s %s\n$brwhite" "Port" "drv-mode" "drv-state" "sensor mode" "Poll" "fwVer" "Basename" "Control directory"
+   
+   for i in $haveportsin;  do
+      printf     "%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n" "${Arrinport[$i]}"   " " " " "${Arrinsensormode[$i]}" "${Arrinpoll[$i]}" "${Arrinfw[$i]}" " " "${Arrinctlpath[$i]}" 
+      printf     "%4s %-10s %-10s %-15s %-3s %-11s %-25s ${green}%-25s$brwhite\n\n" " " "${Arrindrvmode[$i]}" "${Arrindrvstate[$i]}"  " " " " " " "${Arrinbase[$i]}" "${Arrindir[$i]}"
+   done
+ fi
 
-if [ "$haveportsout" != "" ]; then
-  echo -e "\n$brblue output ports recognized:\n"
-  printf "$brblue%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n$brwhite" "Port" "drv-mode" "drv-state" "Type" "Run" "State" "Basename" "Control directory"
-  
-  for i in $haveportsout;  do
-    printf      "%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n" "${Arroutport[$i]}" " " " " "${Arrouttype[$i]}" "${Arroutrun[$i]}" "${Arroutstate[$i]}"  "${Arroutbase[$i]}" "${Arroutctlpath[$i]}"
-    printf      "%4s %-10s %-10s %-15s %-3s %-11s %-25s ${green}%-25s$brwhite\n\n" " " "${Arroutdrvmode[$i]}" "${Arroutdrvstate[$i]}" " " " " " " " " "${Arroutdir[$i]}"
-  done
+ # Report motorports:
+
+ if [ "$haveportsout" != "" ]; then
+   echo -e "\n$brblue output ports recognized:\n"
+   printf "$brblue%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n$brwhite" "Port" "drv-mode" "drv-state" "Type" "Run" "State" "Basename" "Control directory"
+   
+   for i in $haveportsout;  do
+     printf      "%4s %-10s %-10s %-15s %3s %-11s %-25s %s\n" "${Arroutport[$i]}" " " " " "${Arrouttype[$i]}" "${Arroutrun[$i]}" "${Arroutstate[$i]}"  "${Arroutbase[$i]}" "${Arroutctlpath[$i]}"
+     printf      "%4s %-10s %-10s %-15s %3s %-11s %-25s ${green}%-25s$brwhite\n\n" " " "${Arroutdrvmode[$i]}" "${Arroutdrvstate[$i]}" " " " " " " " " "${Arroutdir[$i]}"
+   done
+ fi
+ # width >= tgt-width
+else
+
+ # Report input ports:
+ if [ "$haveportsin" != "" ]; then
+   echo -e "\n$brblue  Input ports recognized:\n"
+   printf "$brblue%4s %-10s %-10s %-14s %-4s %-11s %-25s   \n$brwhite" "Port" "drv-mode" "drv-state" "sensor mode" "Poll" "fwVer" "Basename"
+   # "Control directory"
+   
+   for i in $haveportsin;  do
+      printf     "%4s %-10s %-10s %-15s %-3s %-11s\n"                             "${Arrinport[$i]}"   " " " " "${Arrinsensormode[$i]}" "${Arrinpoll[$i]}" "${Arrinfw[$i]}"
+      printf     "%4s %-10s %-10s %-15s %-3s %-11s %-25s ${green}%s$brwhite\n" " " "${Arrindrvmode[$i]}" "${Arrindrvstate[$i]}"  " " " " " " "${Arrinbase[$i]}"
+      printf     "Mod-ctl ${green}%s$brwhite\n" "${Arrindir[$i]}"
+      printf     "Dev-ctl ${green}%s$brwhite\n\n" "${Arrinctlpath[$i]}" 
+   done
+ fi
+
+ # Report motorports:
+
+ if [ "$haveportsout" != "" ]; then
+   echo -e "\n$brblue output ports recognized:\n"
+   printf "$brblue%4s %-10s %-10s %-15s %-3s %-11s %-25s\n$brwhite" "Port" "drv-mode" "drv-state" "Type" "Run" "State" "Basename"
+   # "Control directory"
+   
+   for i in $haveportsout;  do
+     printf      "%4s %-10s %-10s %-15s %3s %-11s %-25s\n" "${Arroutport[$i]}" " " " " "${Arrouttype[$i]}" "${Arroutrun[$i]}" "${Arroutstate[$i]}"  "${Arroutbase[$i]}"
+     printf      "%4s %-10s %-10s %-15s %3s %-11s %-25s\n" " " "${Arroutdrvmode[$i]}" "${Arroutdrvstate[$i]}" " " " " " " " "
+     printf      "Mod-ctl     ${green}%-25s$brwhite\n" "${Arroutdir[$i]}"
+     printf      "Dev-ctl     ${green}%-25s$brwhite\n\n" "${Arroutctlpath[$i]}"
+   done
+ fi
+ # width <  tgt-width
 fi
