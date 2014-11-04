@@ -17,6 +17,7 @@
 # 20140916 BL       Do not use fixed number suffix on tacho-motor#
 # 20141022 BL       Add rxc-motor and rxc-led
 #                   Adapt to "force motor driver"
+# 20141024 BL       Temporary "fix" for issue 186 (duty-cycle only if "run")
 #============================================================================
 
 
@@ -28,7 +29,7 @@ showmotor () {
       if [ $motorpower -eq 0 ]; then motorcolor=$brgreen
                                 else motorcolor=$brred
       fi
-      printf  "${motorcolor}%3s$brwhite" "`cat $MOTORPATH/$runfilename`"
+      printf  "${motorcolor}%3s$brwhite" "`cat ${MOTORPATH}/$runfilename`"
 }
 
 #
@@ -79,19 +80,22 @@ for m in /sys/class/tacho-motor/motor*
     MOTORPATH="$m"
     if [ -e $MOTORPATH ]; then
       printf "%-40s %-6s " "${MOTORPATH}duty_cycle" "status" 
-      
       # report status before reset
       motorpower=`cat ${MOTORPATH}duty_cycle`
       printf "$brblue %-6s $brwhite%3s " "before" "`showmotor duty_cycle`" 
-      
-#      # echo to duty_cycle DOES not work????? so set command to coast
-#      echo "coast" > ${MOTORPATH}command
-
+#     echo "DEBUG Running in dir `pwd` MOTORPATH=${MOTORPATH}"
+      #
+      # echo duty_cycle only accepted if command=run: ISSUE 186
+      #
+      prevcommand=`cat ${MOTORPATH}command`
+      echo "run" > ${MOTORPATH}command
       # set back to zero:
-      echo  -100 > "${MOTORPATH}duty_cycle"
-      echo   0 > "${MOTORPATH}duty_cycle"
+      echo 0 > "${MOTORPATH}duty_cycle"
+      # set command back:
+      echo $prevcommand > ${MOTORPATH}command
 
       # report status after reset
+#     echo "DEBUG Running in dir `pwd` MOTORPATH=${MOTORPATH}"
       motorpower=`cat ${MOTORPATH}duty_cycle`
       printf "$brblue %-6s $brwhite%-3s\n" "after" "`showmotor duty_cycle`"
     fi      
