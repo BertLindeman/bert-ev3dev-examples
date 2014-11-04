@@ -32,7 +32,7 @@
 # 20140902 BL       o add the momentary current to the message
 # 20140914 BL       o add the voltage to the blinkvoltage call,
 #                     to adapt the type of blinking.
-#                     Since kernel 3.16.1 leds can be better controlled.
+#                     Since kernel 3.16.1 leds can be controlled better.
 #============================================================================
 
 
