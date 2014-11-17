@@ -28,9 +28,9 @@ if [ "$#" -gt 1 ]; then
 fi
    
 if [ "$#" == "0" ]; then
-  MOTORPATH=/sys/class/tacho-motor/tacho-motor0
+  MOTORPATH=/sys/class/tacho-motor/motor0
 else
-  MOTORPATH=/sys/class/tacho-motor/tacho-motor$1
+  MOTORPATH=/sys/class/tacho-motor/motor$1
 fi
 #
 showStateS () {

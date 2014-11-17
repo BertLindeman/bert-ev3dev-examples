@@ -134,6 +134,7 @@ done
   done 
 
 #  PF and rcx leds:
+ if [ -e /sys/class/leds/ev3::out* ]; then
   for port in /sys/class/leds/ev3::out*
   do     
      # echo "path port:${port}"
@@ -194,7 +195,7 @@ done
      fi
      
   done
-
+ 
   sidealign="-"  # align left
   for side in $icol2 $icol3 $icol4 $icol5
   do  
@@ -220,6 +221,6 @@ done
       "${delayOFF[$icol$iside]}" \
       "${triggerArr[$icol$iside]}" 
   done 
-
+ fi
   echo -e " ${endColor} " # back to normal
   

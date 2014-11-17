@@ -35,7 +35,7 @@ do
       cd "${sensors[$i]}"
       if [ "$#" == 0 ] || [ "$selectport" == "`cat port_name`" ]; then
         echo -e "Process $i `pwd`" 
-        echo -e " sensor $i type: `cat type_id` on port `cat port_name` "
+        echo -e " sensor $i type: `cat name` on port `cat port_name` "
         echo -e "dp :                  `cat dp`"
         echo -e "mode:                 `cat mode`"
         echo -e "modes:                `cat modes`"
