@@ -16,7 +16,7 @@
 # 20141104 BL       prepare for release v1.3
 # 20140826 BL       o Add script header
 #                   o No longer show triggers of the leds (confusing)
-#
+# 20141202 BL       Set mmc0 trigger to outA for PF-leds
 #============================================================================
 
 
@@ -34,3 +34,16 @@ echo 1     > /sys/class/leds/ev3\:green\:right/brightness
 #echo heartbeat  > /sys/class/leds/ev3\:red\:right/trigger
 #echo 117        > /sys/class/leds/ev3\:red\:right/brightness
 #
+port="outA"
+  cd /sys/devices/platform/legoev3-ports/${port}
+
+  motormode="rcx-led"
+  motordir="leds"
+  echo ${motormode} > /sys/devices/platform/legoev3-ports/${port}/mode
+  sleep 0.3s
+  controldir=`find /sys/class/${motordir} -name "*${port}*"`
+  if [ -d ${controldir} ]; then
+    echo mmc0 > ${controldir}/trigger
+  else
+    echo -e "Cannot find \"${controldir}\""
+  fi

@@ -157,7 +157,7 @@ do
  
   inlvl1=`echo $p`
   Arroutctlpath[$outportletter]=`echo -e ${green}${inlvl1}$brwhite`
-  if [ "${dir3}" == "dc-motor" ]; then
+  if   [ "${dir3}" == "dc-motor" ]; then
      Arrouttype[$outportletter]="dc-motor"
       Arroutrun[$outportletter]="`cat ${inlvl1}/duty_cycle`"
     Arroutstate[$outportletter]="`cat ${inlvl1}/command`" 
@@ -193,7 +193,7 @@ if [ $scrwidth -ge 130 ]; then
 
  if [ "$haveportsout" != "" ]; then
    echo -e "\n$brblue output ports recognized:\n"
-   printf "$brblue%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n$brwhite" "Port" "drv-mode" "drv-state" "Type" "Run" "State" "Basename" "Control directory"
+   printf "$brblue%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n$brwhite" "Port" "drv-mode" "drv-state" "Type" "Run" "State/Trig" "Basename" "Control directory"
    
    for i in $haveportsout;  do
      printf      "%4s %-10s %-10s %-15s %3s %-11s %-25s %s\n" "${Arroutport[$i]}" " " " " "${Arrouttype[$i]}" "${Arroutrun[$i]}" "${Arroutstate[$i]}"  "${Arroutbase[$i]}" "${Arroutctlpath[$i]}"
@@ -210,7 +210,7 @@ else
    # "Control directory"
    
    for i in $haveportsin;  do
-      printf     "%4s %-10s %-10s %-15s %-3s %-11s\n"                             "${Arrinport[$i]}"   " " " " "${Arrinsensormode[$i]}" "${Arrinpoll[$i]}" "${Arrinfw[$i]}"
+      printf     "%4s %-10s %-10s %-15s %-3s %-11s\n"                          "${Arrinport[$i]}" " " " " "${Arrinsensormode[$i]}" "${Arrinpoll[$i]}" "${Arrinfw[$i]}"
       printf     "%4s %-10s %-10s %-15s %-3s %-11s %-25s ${green}%s$brwhite\n" " " "${Arrindrvmode[$i]}" "${Arrindrvstate[$i]}"  " " " " " " "${Arrinbase[$i]}"
       printf     "Mod-ctl ${green}%s$brwhite\n" "${Arrindir[$i]}"
       printf     "Dev-ctl ${green}%s$brwhite\n\n" "${Arrinctlpath[$i]}" 
@@ -221,7 +221,7 @@ else
 
  if [ "$haveportsout" != "" ]; then
    echo -e "\n$brblue output ports recognized:\n"
-   printf "$brblue%4s %-10s %-10s %-15s %-3s %-11s %-25s\n$brwhite" "Port" "drv-mode" "drv-state" "Type" "Run" "State" "Basename"
+   printf "$brblue%4s %-10s %-10s %-15s %-3s %-11s %-25s\n$brwhite" "Port" "drv-mode" "drv-state" "Type" "Run" "State/Trig" "Basename"
    # "Control directory"
    
    for i in $haveportsout;  do

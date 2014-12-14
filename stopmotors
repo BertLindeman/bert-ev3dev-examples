@@ -19,6 +19,7 @@
 #                   Adapt to "force motor driver"
 # 20140916 BL       Do not use fixed number suffix on tacho-motor#
 # 20140907 BL       Use centralized functions
+# 40141125 BL       Remove circumvention for dc-motors
 #============================================================================
 
 
@@ -84,16 +85,20 @@ for m in /sys/class/tacho-motor/motor*
       # report status before reset
       motorpower=`cat ${MOTORPATH}duty_cycle`
       printf "$brblue %-6s $brwhite%3s " "before" "`showmotor duty_cycle`" 
+      # set ramping to zero to decrease the stop duration:
+    #?  echo 0 > "${MOTORPATH}ramp_down_ms"
+    #?  echo 0 > "${MOTORPATH}ramp_up_ms"
 #     echo "DEBUG Running in dir `pwd` MOTORPATH=${MOTORPATH}"
       #
       # echo duty_cycle only accepted if command=run: ISSUE 186
       #
-      prevcommand=`cat ${MOTORPATH}command`
-      echo "run" > ${MOTORPATH}command
+#      prevcommand=`cat ${MOTORPATH}command`
+#      echo "run" > ${MOTORPATH}command
       # set back to zero:
-      echo 0 > "${MOTORPATH}duty_cycle"
-      # set command back:
-      echo $prevcommand > ${MOTORPATH}command
+      echo 0 > "${MOTORPATH}duty_cycle_sp"
+      echo "brake" > ${MOTORPATH}command
+#      # set command back:
+#      echo $prevcommand > ${MOTORPATH}command
 
       # report status after reset
 #     echo "DEBUG Running in dir `pwd` MOTORPATH=${MOTORPATH}"
