@@ -17,6 +17,7 @@
 # 20141023 BL       adapt to changes at kernel 3.16.1-6
 # 20140911 BL       adapt to changes at kernel 3.16.1-2
 # 20140826 BL       Add script header
+# 20150105 BL       Add servo-motor
 #============================================================================
 # 
 # 
@@ -29,7 +30,7 @@
 #   /sys/class/tacho-motor/motor*/port_name is the link between motor# and port
 #
 #
-IFS=$' \n' read -a tachoPath <<< "`echo /sys/class/tacho-motor/motor*/ /sys/class/dc-motor/motor*/`"
+IFS=$' \n' read -a tachoPath <<< "`echo /sys/class/tacho-motor/motor*/ /sys/class/dc-motor/motor*/ /sys/class/servo-motor/motor*/`"
 #
 for  i in ${!tachoPath[@]} # ! walk the index
 do

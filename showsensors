@@ -3,7 +3,7 @@
 # Author          : Bert Lindeman
 # Description     : Show info of recognized sensors
 # Version         : v1.3
-# Date            : 2014-11-04
+# Date            : 2014-12-29
 # Usage           : showsensors
 # Notes           : 
 # Copyright       : 2014 Bert Lindeman
@@ -16,7 +16,10 @@
 # 20141104 BL       prepare for release v1.3
 # 20140924 BL       allow a parameter to only show ONE sensor
 #                   Easy to use watch and see only that sensor
-#
+# 20141229 BL       o Adapt to updates in
+#                     kernel version 3.16.1-8-ev3dev
+# 20150109 BL       update for 3.16.7
+#                   o device_name -> driver_name
 #============================================================================
 #
 selectport=${1:-}
@@ -24,7 +27,8 @@ selectport=${1:-}
 #
 # determine which interface services what input port:
 #
-IFS=$' \n' read -a sensors <<< "`echo /sys/class/msensor/sensor*/`"
+# IFS=$' \n' read -a sensors <<< "`echo /sys/class/msensor/sensor*/`"
+  IFS=$' \n' read -a sensors <<< "`echo /sys/class/lego-sensor/sensor*/`"
 #
 hits=0
 #
@@ -34,11 +38,49 @@ do
   if [ -e "${sensors[$i]}" ]; then
       cd "${sensors[$i]}"
       if [ "$#" == 0 ] || [ "$selectport" == "`cat port_name`" ]; then
+      
+      
+#cat port_name
+#cat units
+#cat address 
+#cat bin_data
+#cat bin_data_format
+#cat command
+#cat commands
+#cat decimals
+#cat device_name
+#cat mode
+#cat modes
+#cat num_values
+#cat value0
+#cat value1
+#cat value2
+#cat value3
+#cat value4
+#cat value5
+#cat value6
+#cat value7 
+#  nxt-i2c cat fw_version
+#  nxt-12c cat poll_ms
+
+        cat commands 2>/dev/null
+        RC="$?"
+        if [ "${RC}" == "0" ]; then
+           # echo "commands implemented"
+           cmd="`cat commands`"
+        else
+           # echo "commands returned RC=${RC}"  
+           cmd="not implemented"
+        fi
+      
         echo -e "Process $i `pwd`" 
-        echo -e " sensor $i type: `cat name` on port `cat port_name` "
-        echo -e "dp :                  `cat dp`"
+#        echo -e " sensor $i device_name: `cat device_name` on port `cat port_name` "
+        echo -e " sensor $i driver_name: `cat driver_name` on port `cat port_name` "
+        echo -e "address:              `cat address`"
         echo -e "mode:                 `cat mode`"
         echo -e "modes:                `cat modes`"
+        echo -e "commands:             ${cmd}"
+        echo -e "decimals:             `cat decimals`"
         echo -e "num_values:           `cat num_values`"
         num_values="`cat num_values`"
         for (( v=0; v<$num_values; v++ ))

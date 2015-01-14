@@ -3,7 +3,7 @@
 # Author          : Bert Lindeman
 # Description     : List sensors and motors
 # Version         : v1.3
-# Date            : 2014-11-04
+# Date            : 2014-12-28
 # Usage           : listports
 # Notes           : 
 # Copyright       : 2014 Bert Lindeman
@@ -25,39 +25,52 @@
 #                   o slightly different file names
 #                   o motor type -> device_type
 #                   o issue 123: force mode to input ports and output ports
+# 20141228 BL       o Adapt to updates in 
+#                       kernel version 3.16.1-8-ev3dev
 #
 #============================================================================
 
 . /usr/local/bin/bert_ev3dev_functions
 
+
+findinport() {
+   # look in lego-port sysfs directories to determine which lego-port 
+   # is processing the in% port we are looking for (From parameter-1)
+   portpath=`grep -i "${1}" /sys/class/lego-port/port*/port_name`
+   # results in /sys/class/lego-port/port7/port_name:outD
+   # take dirname: bla/bla/port7
+   # take basename
+   portdir=`dirname ${portpath}`
+   legoport=`basename ${portdir}`
+   #set +x
+}
+
  haveportsin=""
  haveportsout=""  
 
-findstr=`find /sys/devices/platform/legoev3-ports/ -maxdepth 2 -name "in[1234]\:*" `
+# one extra directory level since 3.16.1-8: -maxdepth 3 instead of 2
+findstr=`find /sys/devices/platform/legoev3-ports/ -maxdepth 3 -name "in[1234]\:*" `
 #
 for p in $findstr
 do 
+  echo -en "\r-"
   basename="`basename $p`" 
   dirname="`dirname $p`"
   
   # split basename before and after ":"
   porttype1="${basename%%:*}"
   porttype2="${p#*:}"
-  
-  device_type="`cat $p/device_type`"
-  #
-  # echo "DEBUG2 port: $porttype1 $porttype2  test for  ${porttype1:0:2} \=\= \"in\" $device_type "
   #
   if [ ${porttype1:0:2} == "in" ]; then
     
     driver_mode="`cat $dirname/mode`"
-    driver_state="`cat $dirname/state`"
+    driver_status="`cat $dirname/status`" # was state
     inportnumber=${porttype1:2:1}  # in%
     haveportsin="$haveportsin $inportnumber"
     
       Arrindir[$inportnumber]=${dirname}
   Arrindrvmode[$inportnumber]=${driver_mode}
- Arrindrvstate[$inportnumber]=${driver_state}
+ Arrindrvstate[$inportnumber]=${driver_status}
      Arrinport[$inportnumber]=${porttype1}                #${inportnumber} 
      Arrintype[$inportnumber]=${porttype2}
      Arrinbase[$inportnumber]=${basename}
@@ -66,18 +79,18 @@ do
    
 
     pathColor="$green"
-    CURSENSOR="?"     # set default so we know if it was unknown
+    CURSENSOR="*"     # set default so we know if it was unknown
     
     findsensorctl ${inportnumber}
-    inlvl1=`echo -e /sys/class/msensor/sensor${CURSENSOR}/`    
-    Arrinsensormode[${inportnumber}]=`cat /sys/class/msensor/sensor${CURSENSOR}/mode`
-    if [ -e /sys/class/msensor/sensor${CURSENSOR}/fw_version  ]; then
-      Arrinfw[${inportnumber}]=`cat /sys/class/msensor/sensor${CURSENSOR}/fw_version`
+    inlvl1=`echo -e /sys/class/lego-sensor/sensor${CURSENSOR}/`    
+    Arrinsensormode[${inportnumber}]=`cat /sys/class/lego-sensor/sensor${CURSENSOR}/mode`
+    if [ -r /sys/class/lego-sensor/sensor${CURSENSOR}/fw_version  ]; then
+      Arrinfw[${inportnumber}]=`cat /sys/class/lego-sensor/sensor${CURSENSOR}/fw_version`
     else  
       Arrinfw[${inportnumber}]=" "
     fi        
-    if [ -e /sys/class/msensor/sensor${CURSENSOR}/poll_ms  ]; then
-      Arrinpoll[${inportnumber}]=`cat /sys/class/msensor/sensor${CURSENSOR}/poll_ms`
+    if [ -r /sys/class/lego-sensor/sensor${CURSENSOR}/poll_ms  ]; then
+      Arrinpoll[${inportnumber}]=`cat /sys/class/lego-sensor/sensor${CURSENSOR}/poll_ms 2>/dev/null`  
     else  
       Arrinpoll[${inportnumber}]=" "
     fi        
@@ -89,20 +102,26 @@ do
     fi  
     Arrinctlpath[$inportnumber]=`echo -e ${pathColor}${inlvl1}$brwhite`     
   fi
+  echo -en "\r|"
   
 done
 
+# 
 # findstr=`find /sys/devices/platform/legoev3-ports/ -maxdepth 2 -name "in[1234]\:*" -o  -name "out[ABCD]*" -name "*\:*"`
 findstr=`/bin/ls -d /sys/class/tacho-motor/tacho-motor*/ 2>/dev/null` # before kernel 3.16.1-6
 if [ $? == 0 ]; then
    findstr=`/bin/ls -d /sys/class/tacho-motor/tacho-motor*/`
 else                                                                  # at kernel 3.16.1-6 and later
+ if [ $? == 0 ]; then
+   findstr=`/bin/ls -d /sys/class/lego-port/port*/out* 2>/dev/null`
+ else                                                                  # at kernel 3.16.1-8 and later
    set +e
    findstr=`/bin/ls -d /sys/class/*motor/motor*/    2>/dev/null`
    findled=`/bin/ls -d /sys/class/leds/ev3::out*/   2>/dev/null`
    set -e
+ fi  
 fi   
-
+set +x
 # sofar found 3 motor types:
 # /bin/ls -ld /sys/class/dc-motor/motor*/    2>/dev/null
 # /bin/ls -ld /sys/class/tacho-motor/motor*/ 2>/dev/null 
@@ -122,16 +141,19 @@ declare -A Arroutstate=(   [A]=a [B]=b [C]=c [D]=d )
 declare -A Arroutdrvmode=( [A]=a [B]=b [C]=c [D]=d )
 declare -A Arroutdrvstate=([A]=a [B]=b [C]=c [D]=d )
 # 
-
+# 
 for p in ${findstr} ${findled}
 do
+  echo -en "\r/"
+# set -x
   # determine motortype
   basename="`basename $p`" 
   dirname="`dirname $p`" 
-  dir3="`basename ${dirname}`" # third node in path
+  # echo "Processing \"$p\" dir: $dirname base: $basename  "
+  dir3="`basename ${dirname}`" # last-but-one node in path
 
   if stringcontains '::' "${basename}" ;  then # led-type 
-  echo "================== got :: in ${basename}"
+  # echo "================== got :: in ${basename}"
     porttype1="${basename%%::*}" # double ::
     porttype2="${p#*::}"
     portname="${porttype2:0:4}"    
@@ -141,18 +163,21 @@ do
     portname="`cat $p/port_name`"
   fi  
   #
-  # portname="`cat $p/port_name`"
   outportletter=${portname:3:1} # out%
   #
-  driver_mode="`cat /sys/devices/platform/legoev3-ports/$portname/mode`"
-  driver_state="`cat /sys/devices/platform/legoev3-ports/$portname/state`"
+  driver_mode="`cat /sys/devices/platform/legoev3-ports/lego-port/port*/${portname}*/../mode`"
+  set +e
+  findinport "$portname"
+  driver_status="`cat /sys/devices/platform/legoev3-ports/lego-port/${legoport}/status`"
+  set -e
   #
   
   Arroutdrvmode[$outportletter]=${driver_mode}
- Arroutdrvstate[$outportletter]=${driver_state}
+ Arroutdrvstate[$outportletter]=${driver_status}
   haveportsout="$haveportsout $outportletter"
      Arroutbase[$outportletter]=${basename}
-      Arroutdir[$outportletter]="/sys/devices/platform/legoev3-ports/"${portname}
+     
+      Arroutdir[$outportletter]="/sys/devices/platform/legoev3-ports/lego-port/"${legoport}
      Arroutport[$outportletter]=${portname} # out%
  
   inlvl1=`echo $p`
@@ -171,9 +196,11 @@ do
       Arroutrun[$outportletter]="`cat ${inlvl1}/run`"
     Arroutstate[$outportletter]="`cat ${inlvl1}/state`" 
   fi  
+  echo -en "\r\\"
 done  
 
 set +x
+  echo -en " \r \r"
 # take screenwidth into account:
 scrwidth=`tput cols`
 if [ $scrwidth -ge 130 ]; then

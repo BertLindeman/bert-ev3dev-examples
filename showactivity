@@ -17,33 +17,54 @@
 # 20140826 BL       o Add script header
 #                   o No longer show triggers of the leds (confusing)
 # 20141202 BL       Set mmc0 trigger to outA for PF-leds
+# 20150114 BL       adapt for kernel 3.16.7-ckt3-ev3dev1
 #============================================================================
-
-
-# These were available on Wheezy
-# No longer available on Jessie
-#echo phy0tx    > /sys/class/leds/ev3\:green\:right/trigger
-#echo phy0rx    > /sys/class/leds/ev3\:green\:left/trigger
-#echo phy0assoc > /sys/class/leds/ev3\:red\:left/trigger
-#echo phy0radio > /sys/class/leds/ev3\:red\:right/trigger
 #
 # set right green led to show I/O activity: 
 echo mmc0  > /sys/class/leds/ev3\:green\:right/trigger
+sleep 0.25s
 echo 1     > /sys/class/leds/ev3\:green\:right/brightness
+sleep 0.25s
 #
-#echo heartbeat  > /sys/class/leds/ev3\:red\:right/trigger
-#echo 117        > /sys/class/leds/ev3\:red\:right/brightness
 #
-port="outA"
-  cd /sys/devices/platform/legoev3-ports/${port}
+. /usr/local/bin/bert_ev3dev_functions
 
-  motormode="rcx-led"
-  motordir="leds"
-  echo ${motormode} > /sys/devices/platform/legoev3-ports/${port}/mode
-  sleep 0.3s
-  controldir=`find /sys/class/${motordir} -name "*${port}*"`
-  if [ -d ${controldir} ]; then
-    echo mmc0 > ${controldir}/trigger
+
+portletter="A"
+port="out${portletter}"
+# verify there is NO MOTOR on port outA
+  findmotorctl "${port}"
+  # echo "CURMOTOR=\"${CURMOTOR}\" SEENPORT=\"${SEENPORT}\""
+#  if listcontains "outA" "${CURMOTOR}" ; then
+   if listcontains "${SEENPORT}" "outA" ; then
+    echo "Motor present on ${port}: no action"
+    exit
   else
-    echo -e "Cannot find \"${controldir}\""
+    if [ "${CURMOTOR}" == "???????" ]; then
+      echo "OK, no motor on ${port}: is outA already \"led\"?"
+      if [ ! -e /sys/class/leds/ev3\:\:outA/trigger ]; then
+        echo "No outA trigger yet, Add PF led on port outA"
+        tryPF outA led   
+      fi  
+## currently /sys/devices/platform/legoev3-ports/lego-port/port4
+##           /sys/class/lego-port/port4/outA:rcx-led/leds/ev3::outA
+#    cd /sys/devices/platform/legoev3-ports/${port}
+# 
+#    motormode="rcx-led"
+#    motordir="leds"
+#    echo ${motormode} > /sys/devices/platform/legoev3-ports/${port}/mode
+#    sleep 0.3s
+#    controldir=`find /sys/class/${motordir} -name "*${port}*"`
+#    if [ -d ${controldir} ]; then
+#      echo mmc0 > ${controldir}/trigger
+#    else
+#      echo -e "Cannot find \"${controldir}\""
+#      find /sys/class/${motordir} -name "*${port}*"
+#    fi
+    fi
   fi
+
+if [ -w /sys/class/leds/ev3\:\:outA/trigger ]; then
+  echo "set \"mmc0\" to \"/sys/class/leds/ev3\:\:outA/trigger\""
+  echo mmc0 > /sys/class/leds/ev3\:\:outA/trigger
+fi
