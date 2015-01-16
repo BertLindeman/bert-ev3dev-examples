@@ -20,6 +20,7 @@ They are are meant to be run on a terminal session, like in an ssl-session.
     * [checkpower](https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/checkpower) Add this script to a crontab to check for the battery voltage. On lower power the EV3-led on the left will blink green on lower voltage, then amber and eventually red (with a beep). 
     Uses [blinkvoltage](https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/blinkvoltage)
     * [showactivity](https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/showactivity) Makes the right green led blink on I/O activity.
+    Uses [/usr/local/bin/tryPF](https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/tryPF)
     * [stopmotors](https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/stopmotors) Well, stops all motors.
 3. Scripts discovering sensors and / or motors
     * [blinkleds](https://github.com/BertLindeman/bert-ev3dev-examples/blob/master/blinkleds) Simply blink the EV3 leds a few times.
@@ -33,6 +34,9 @@ They are are meant to be run on a terminal session, like in an ssl-session.
     
 
 ### Have your EV3 report the IP-addresses by speach after boot 
+##### No longer maintained here since (Add IP address to status bar)(https://github.com/ev3dev/brickman/commit/4cdf6b54e1438c13a245ba28caf5bbc17b98a245)
+  Brickman neatly shows the current IP-address on the status bar.
+  Kept the description as documentation.
 ##### Starting at ev3dev image ev3dev-jessie-2014-10-07
 
 For this an update is needed to `/etc/rc.local`
