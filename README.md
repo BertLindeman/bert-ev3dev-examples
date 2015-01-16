@@ -34,7 +34,7 @@ They are are meant to be run on a terminal session, like in an ssl-session.
     
 
 ### Have your EV3 report the IP-addresses by speach after boot 
-##### No longer maintained here since (Add IP address to status bar)(https://github.com/ev3dev/brickman/commit/4cdf6b54e1438c13a245ba28caf5bbc17b98a245)
+##### No longer maintained here since [Add IP address to status bar](https://github.com/ev3dev/brickman/commit/4cdf6b54e1438c13a245ba28caf5bbc17b98a245)
   Brickman neatly shows the current IP-address on the status bar.
   Kept the description as documentation.
 ##### Starting at ev3dev image ev3dev-jessie-2014-10-07
