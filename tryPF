@@ -1,0 +1,143 @@
+#!/bin/bash -ue
+# Script_name     : tryPF
+# Author          : Bert Lindeman
+# Description     : Set an output port for Power-Functions led or motor
+# Version         : v1.3
+# Date            : 2015-01-16
+# Usage           : tryPF <portletter> <led | motor>
+#                   default is "tryPF A led"
+#
+# Notes           : This script is used by showactivity
+#                  
+# Copyright       : 2015 Bert Lindeman
+# License         : GPL-3.0+
+#
+#
+#
+# Changelog
+# Date     By       Description
+#
+#
+#
+. /usr/local/bin/bert_ev3dev_functions
+#
+showattr() {
+  for f in ${1}
+  do
+    attr=`cat $f` # get the field and then do echo to get uevent on one line
+    printf "%10s %-20s %s\n" " " "`basename $f`" "`echo ${attr}`"
+  done
+}
+
+showmotor_attr() {
+  ctlpath=${1:-"??"}
+  set +x
+ 
+  echo -en "  Current directory: `pwd`; "
+  echo -e  "    Potential mode: `cat modes`"
+ 
+# printf format to ESCAPE a string:
+# %q       quote the argument in a way that can be reused as shell input
+  echo "  Switch to ctlpath \"${ctlpath}\""
+  cd `printf "%q" "${ctlpath}"`
+  echo -e "  Port:${port} ${motordir} controldir: ${controldir}"
+  echo -e "     attributes:"
+  attr=`find  ${controldir}/ -maxdepth 1 -type f`
+  showattr "$attr"
+}
+
+findPortnumber () {
+  # find on which port* the port_name is controlled
+  local port portctl
+  local port_name
+  local intl_port_dir intl_port_name
+  local curmodes wantmode
+  port="${1}"
+  portctl=/sys/class/lego-port/port*/port_name  
+  CTL_PATH=""
+  #  set -x
+  for IOPORT in ${portctl}
+  do
+     port_name="`cat \"${IOPORT}\"`"
+     intl_port_dir="`dirname ${IOPORT}`"
+     intl_port_name="`basename ${intl_port_dir}`"
+     if [ "${port_name}" == "${port}" ]; then
+       echo "port \"${port}\" found on \"${intl_port_name}\""
+       # ls -l ${intl_port_dir}/
+       curmodes=`cat ${intl_port_dir}/modes`
+       wantmode="rcx-motor"
+       if listcontains "$curmodes" "$wantmode" ; then
+         CTL_PATH="${intl_port_dir}"
+       fi  
+       break
+     fi
+  done
+
+}
+ 
+################# mainline #################
+port="${1:-outA}"
+type="${2:-led}"  # led or motor
+
+# set -x
+if [ "$type" == "motor" ]; then
+  echo "# PF-motor ###################################################################"
+ 
+  findPortnumber ${port}
+  cd ${CTL_PATH}
+  motorbase="`basename ${CTL_PATH}`"
+  # echo -e "currentdir=`pwd`"
+  
+  motormode="rcx-motor"
+  motordir="dc-motor"
+  
+  echo ${motormode} > mode
+  # sleep 0.75s
+  found=0
+  
+  while : ; do
+    [[ -e `find /sys/devices/platform/legoev3-ports/lego-port/${motorbase}/${port}*/${motordir} -name "motor*"` ]] && found=1 && break
+    echo "Pausing until led / motor directory exists."
+    sleep 1
+  done
+   
+# realpath:
+# /sys/devices/platform/legoev3-ports/lego-port/port6/outC:rcx-motor/dc-motor/motor10 
+  controldir=`find /sys/devices/platform/legoev3-ports/lego-port/${motorbase}/${port}*/${motordir} -name "motor*"`
+  
+  if [ ${found} == 1 ] && [ -d ${controldir} ]; then
+    showmotor_attr ${controldir}
+  else
+    echo -e "Cannot find \"${controldir}\""
+    find /sys/class/${motordir} -name "motor*"
+  fi  
+  set _x
+elif [ "$type" == "led" ]; then
+  echo "# PF-led   ###################################################################"
+
+  findPortnumber ${port}
+  cd ${CTL_PATH}
+  
+  motormode="rcx-led"
+  motordir="leds"
+
+  echo ${motormode} > mode
+  #sleep 0.75s  
+  found=0
+  
+  while : ; do
+    [[ -e `find /sys/class/${motordir} -name "*${port}*"` ]] && found=1 && break
+    echo "Pausing until led / motor directory exists."
+    sleep 1
+  done
+  
+  controldir=`find /sys/class/${motordir} -name "*${port}*"`
+  if [ ${found} == 1 ] && [ -d ${controldir} ]; then
+    showmotor_attr ${controldir}
+  else
+    echo -e "Cannot find \"${controldir}\""
+    find /sys/class/${motordir} -name "*${port}*"
+  fi  
+fi  
+#
+exit

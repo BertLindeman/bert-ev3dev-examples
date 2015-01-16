@@ -18,6 +18,7 @@
 #                   o No longer show triggers of the leds (confusing)
 # 20141202 BL       Set mmc0 trigger to outA for PF-leds
 # 20150114 BL       adapt for kernel 3.16.7-ckt3-ev3dev1
+# 20150116 BL       use /usr/local/bin/tryPF to add leds on outA
 #============================================================================
 #
 # set right green led to show I/O activity: 
@@ -34,8 +35,6 @@ portletter="A"
 port="out${portletter}"
 # verify there is NO MOTOR on port outA
   findmotorctl "${port}"
-  # echo "CURMOTOR=\"${CURMOTOR}\" SEENPORT=\"${SEENPORT}\""
-#  if listcontains "outA" "${CURMOTOR}" ; then
    if listcontains "${SEENPORT}" "outA" ; then
     echo "Motor present on ${port}: no action"
     exit
@@ -43,28 +42,13 @@ port="out${portletter}"
     if [ "${CURMOTOR}" == "???????" ]; then
       echo "OK, no motor on ${port}: is outA already \"led\"?"
       if [ ! -e /sys/class/leds/ev3\:\:outA/trigger ]; then
-        echo "No outA trigger yet, Add PF led on port outA"
-        tryPF outA led   
-      fi  
-## currently /sys/devices/platform/legoev3-ports/lego-port/port4
-##           /sys/class/lego-port/port4/outA:rcx-led/leds/ev3::outA
-#    cd /sys/devices/platform/legoev3-ports/${port}
-# 
-#    motormode="rcx-led"
-#    motordir="leds"
-#    echo ${motormode} > /sys/devices/platform/legoev3-ports/${port}/mode
-#    sleep 0.3s
-#    controldir=`find /sys/class/${motordir} -name "*${port}*"`
-#    if [ -d ${controldir} ]; then
-#      echo mmc0 > ${controldir}/trigger
-#    else
-#      echo -e "Cannot find \"${controldir}\""
-#      find /sys/class/${motordir} -name "*${port}*"
-#    fi
+        echo "Field trigger on outA does not exist yet: Add PF led on port outA"
+        /usr/local/bin/tryPF outA led   
+      fi 
     fi
   fi
 
 if [ -w /sys/class/leds/ev3\:\:outA/trigger ]; then
-  echo "set \"mmc0\" to \"/sys/class/leds/ev3\:\:outA/trigger\""
+  echo "set \"/sys/class/leds/ev3\:\:outA/trigger\" to \"mmc0\" "
   echo mmc0 > /sys/class/leds/ev3\:\:outA/trigger
 fi
