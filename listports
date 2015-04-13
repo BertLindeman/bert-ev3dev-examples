@@ -27,7 +27,7 @@
 #                   o issue 123: force mode to input ports and output ports
 # 20141228 BL       o Adapt to updates in 
 #                       kernel version 3.16.1-8-ev3dev
-#
+# 20150202 BL       Shift some fields in the report to prevent ragged columns
 #============================================================================
 
 . /usr/local/bin/bert_ev3dev_functions
@@ -204,15 +204,16 @@ set +x
 # take screenwidth into account:
 scrwidth=`tput cols`
 if [ $scrwidth -ge 130 ]; then
+ # width >= tgt-width
 
  # Report input ports:
  if [ "$haveportsin" != "" ]; then
    echo -e "\n$brblue  Input ports recognized:\n"
-   printf "$brblue%4s %-10s %-10s %-14s %-4s %-11s %-25s %s\n$brwhite" "Port" "drv-mode" "drv-state" "sensor mode" "Poll" "fwVer" "Basename" "Control directory"
+   printf "$brblue%4s %-10s %-10s %-14s %-4s %-21s %-20s %s\n$brwhite" "Port" "drv-mode" "drv-state" "sensor mode" "Poll" "fwVer" "Basename" "Control directory"
    
    for i in $haveportsin;  do
-      printf     "%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n" "${Arrinport[$i]}"   " " " " "${Arrinsensormode[$i]}" "${Arrinpoll[$i]}" "${Arrinfw[$i]}" " " "${Arrinctlpath[$i]}" 
-      printf     "%4s %-10s %-10s %-15s %-3s %-11s %-25s ${green}%-25s$brwhite\n\n" " " "${Arrindrvmode[$i]}" "${Arrindrvstate[$i]}"  " " " " " " "${Arrinbase[$i]}" "${Arrindir[$i]}"
+      printf     "%4s %-10s %-10s %-15s %-3s %-21s %-20s %s\n" "${Arrinport[$i]}"   " " " " "${Arrinsensormode[$i]}" "${Arrinpoll[$i]}" "${Arrinfw[$i]}" " " "${Arrinctlpath[$i]}" 
+      printf     "%4s %-10s %-24s %-01s %-3s %-21s %-20s ${green}%-25s$brwhite\n\n" " " "${Arrindrvmode[$i]}" "${Arrindrvstate[$i]}"  " " " " " " "${Arrinbase[$i]}" "${Arrindir[$i]}"
    done
  fi
 
@@ -220,15 +221,16 @@ if [ $scrwidth -ge 130 ]; then
 
  if [ "$haveportsout" != "" ]; then
    echo -e "\n$brblue output ports recognized:\n"
-   printf "$brblue%4s %-10s %-10s %-15s %-3s %-11s %-25s %s\n$brwhite" "Port" "drv-mode" "drv-state" "Type" "Run" "State/Trig" "Basename" "Control directory"
+   printf "$brblue%4s %-10s %-10s %-15s %-3s %-21s %-20s %s\n$brwhite" "Port" "drv-mode" "drv-state" "Type" "Run" "State/Trig" "Basename" "Control directory"
    
    for i in $haveportsout;  do
-     printf      "%4s %-10s %-10s %-15s %3s %-11s %-25s %s\n" "${Arroutport[$i]}" " " " " "${Arrouttype[$i]}" "${Arroutrun[$i]}" "${Arroutstate[$i]}"  "${Arroutbase[$i]}" "${Arroutctlpath[$i]}"
-     printf      "%4s %-10s %-10s %-15s %3s %-11s %-25s ${green}%-25s$brwhite\n\n" " " "${Arroutdrvmode[$i]}" "${Arroutdrvstate[$i]}" " " " " " " " " "${Arroutdir[$i]}"
+     printf      "%4s %-10s %-10s %-15s %3s %-21s %-20s %s\n" "${Arroutport[$i]}" " " " " "${Arrouttype[$i]}" "${Arroutrun[$i]}" "${Arroutstate[$i]}"  "${Arroutbase[$i]}" "${Arroutctlpath[$i]}"
+     printf      "%4s %-10s %-24s %-01s %3s %-21s %-20s ${green}%-25s$brwhite\n\n" " " "${Arroutdrvmode[$i]}" "${Arroutdrvstate[$i]}" " " " " " " " " "${Arroutdir[$i]}"
    done
  fi
  # width >= tgt-width
 else
+ # width <  tgt-width
 
  # Report input ports:
  if [ "$haveportsin" != "" ]; then

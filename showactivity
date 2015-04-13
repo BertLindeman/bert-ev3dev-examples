@@ -21,6 +21,13 @@
 # 20150116 BL       use /usr/local/bin/tryPF to add leds on outA
 #============================================================================
 #
+
+#
+   # Assign "non-cron" if ENVIRONMENT is unset or null, and thus prevent error "variable unbound":
+   : "${ENVIRONMENT:=non-cron}"
+#
+#
+
 # set right green led to show I/O activity: 
 echo mmc0  > /sys/class/leds/ev3\:green\:right/trigger
 sleep 0.25s
@@ -36,19 +43,27 @@ port="out${portletter}"
 # verify there is NO MOTOR on port outA
   findmotorctl "${port}"
    if listcontains "${SEENPORT}" "outA" ; then
-    echo "Motor present on ${port}: no action"
-    exit
+     if [ "$ENVIRONMENT" == "non-cron" ]; then
+       echo "Motor present on ${port}: no action"
+       exit
+     fi
   else
     if [ "${CURMOTOR}" == "???????" ]; then
-      echo "OK, no motor on ${port}: is outA already \"led\"?"
+      if [ "$ENVIRONMENT" == "non-cron" ]; then
+        echo "OK, no motor on ${port}: is outA already \"led\"?"
+      fi
       if [ ! -e /sys/class/leds/ev3\:\:outA/trigger ]; then
-        echo "Field trigger on outA does not exist yet: Add PF led on port outA"
+        if [ "$ENVIRONMENT" == "non-cron" ]; then
+          echo "Field trigger on outA does not exist yet: Add PF led on port outA" 
+        fi
         /usr/local/bin/tryPF outA led   
       fi 
     fi
   fi
 
 if [ -w /sys/class/leds/ev3\:\:outA/trigger ]; then
-  echo "set \"/sys/class/leds/ev3\:\:outA/trigger\" to \"mmc0\" "
+  if [ "$ENVIRONMENT" == "non-cron" ]; then
+    echo "set \"/sys/class/leds/ev3\:\:outA/trigger\" to \"mmc0\" "
+  fi 
   echo mmc0 > /sys/class/leds/ev3\:\:outA/trigger
 fi

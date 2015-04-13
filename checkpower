@@ -34,6 +34,8 @@
 #                     but show the status WARN / MED / LOW / OK
 #                   o whole algorithm did NOT work :-(
 #                   o Check if ENVIRONMENT variable is set.
+# 20150206 BL       Use leading blank (not leading zero) on day of month
+#                   So it looks more like the other data in syslog.
 #============================================================================
 
 
@@ -69,5 +71,5 @@
    if [ "$ENVIRONMENT" == "non-cron" ]; then # just a message; no need to add to syslog 
       echo -e "voltage $status: $voltage; current: $current "
    else
-      echo -e "`date +"%b %d %T"` $HOSTNAME cron: $ENVIRONMENT -  voltage $status: $voltage; current: $current" >> /var/log/syslog
+      echo -e "`date +"%b %_d %T"` $HOSTNAME cron: $ENVIRONMENT -  voltage $status: $voltage; current: $current" >> /var/log/syslog
    fi   

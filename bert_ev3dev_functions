@@ -53,6 +53,11 @@
 
  endColorp='\[\e[0m\]'
 
+#
+   # Assign "non-cron" if ENVIRONMENT is unset or null, and thus prevent error "variable unbound":
+   : "${ENVIRONMENT:=non-cron}"
+#
+
 ascii2hex(){ 
  printf "$@" | hexdump -v -e '/1 "%02x"'
 }
@@ -199,7 +204,9 @@ findmotorctl () {
       fi
     fi  
   done
-  echo "CURMOTOR: \"${CURMOTOR}\" SEENPORT: \"$SEENPORT\" port: \"${port}\""  
+  if [ "$ENVIRONMENT" == "non-cron" ]; then
+    echo "CURMOTOR: \"${CURMOTOR}\" SEENPORT: \"$SEENPORT\" port: \"${port}\""  
+  fi  
 }
 
 OFFred () {
