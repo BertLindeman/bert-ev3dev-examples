@@ -19,6 +19,15 @@
 #                   brightness since kernel 3.16.1 is honoured
 #                   and no longer a switch                   
 # 20140826 BL       add script header
+# 20150521 BL       adapt for kernel 3.16.7-ckt11-5-ev3dev-ev3
+#                   no longer ev3:red:left
+#                             ev3:green:left
+#                             ev3:red:right
+#                             ev3:green:right
+#                         but ev3-left0:red:ev3dev
+#                             ev3-left1:green:ev3dev
+#                             ev3-right0:red:ev3dev
+#                             ev3-right1:green:ev3dev
 #
 #============================================================================
 
@@ -46,23 +55,6 @@ usageEXIT () {
 }
 
 #set -v -x
-
-#showLEDtrigger () {
-# # echo "showing trigger from $1"
-# for word in `cat $1` ;
-#  do
-#    delim=${word:0:1}${word:${#word}-1:1}
-#    if [ $delim == "[]" ]; then
-#      trigger=${word:1:${#word}-2}
-#      # echo "current trigger now: $trigger"
-#      break # do not search further
-#    else
-#      trigger=$word  
-#    fi
-#  done
-#  currenttrigger=$trigger
-#  echo "  current trigger=$currenttrigger" 
-# }
 
 verifyLEDtrigger () {
   for word in `cat $2` ;
@@ -139,41 +131,56 @@ verifyLEDtrigger () {
      ;;
  esac
 
- ledbase="/sys/class/leds/ev3:$tosetColor:$side"
+ #ledbase="/sys/class/leds/ev3:$tosetColor:$side"
+ # using ledid for the combination of ${side} and ${tosetcolor}
+ # as the color adds a suffix to the side
+ # e.g. left red   becomes left0:red
+ # and  left green becomes left1:green
+ # there will be a reason for this.
+ if [ "${tosetColor}" == "red" ]; then
+   ledid="${side}0:${tosetColor}"
+ else  
+   ledid="${side}1:${tosetColor}"
+ fi  
+ ledbase="/sys/class/leds/ev3-${ledid}:ev3dev"
  ledbrightness="$ledbase/brightness"
  ledtriggerpath="$ledbase/trigger"
  
- if [ "$tosetTrigger" == "" ]; then
+ if [ "${tosetTrigger}" == "" ]; then
    tosetTrigger ="none"
  else  
-   verifyLEDtrigger "$tosetTrigger" "$ledtriggerpath"
+   verifyLEDtrigger "${tosetTrigger}" "${ledtriggerpath}"
  fi
  
  echo "base directory $ledbase"
  
  if [ $command == "cat" ]; then
    echo "  brightness=`cat $ledbrightness`"
-   showtrigger "`cat $ledtriggerpath`"
+   # showtrigger "`cat ${ledtriggerpath}`"
  else
    echo "BEFORE:"
    echo "  brightness=`cat $ledbrightness`"
-
-   showtrigger "`cat $ledtriggerpath`"
-   
-   # echo "setting trigger to $tosetTrigger > $ledtriggerpath"
-   if [ "$p4" != "" ]; then
-     echo $tosetTrigger > $ledtriggerpath 
-     if [ $? -ne 0 ]; then
-       echo -e "!!!!!!!!returncode of trigger: $?"
-     fi
-   fi  
-   # showLEDtrigger $ledtriggerpath  
    
    echo $valueORzero > $ledbrightness 
    if [ $? -ne 0 ]; then
      echo -e "!!!!!!!!returncode of command: $?"
    fi  
+
+   showtrigger "`cat ${ledtriggerpath}`"
+   echo "  trigger   =  \"${currenttrigger}\""
+   
+   if [ "$p4" != "" ]; then
+     
+     echo ${tosetTrigger} > ${ledtriggerpath} 
+     if [ $? -ne 0 ]; then
+       echo -e "!!!!!!!!returncode of trigger: $?"
+     fi
+   fi
+     
    echo "AFTER:"
    echo "  brightness=`cat $ledbrightness`"
-   showtrigger "`cat $ledtriggerpath`"
+
+   showtrigger "`cat ${ledtriggerpath}`"
+   echo "  trigger   =  \"${currenttrigger}\""
+   
  fi    

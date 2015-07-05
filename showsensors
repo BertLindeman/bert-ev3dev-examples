@@ -20,6 +20,7 @@
 #                     kernel version 3.16.1-8-ev3dev
 # 20150109 BL       update for 3.16.7
 #                   o device_name -> driver_name
+# 20150614 BL       field address no longer exists
 #============================================================================
 #
 selectport=${1:-}
@@ -74,9 +75,8 @@ do
         fi
       
         echo -e "Process $i `pwd`" 
-#        echo -e " sensor $i device_name: `cat device_name` on port `cat port_name` "
         echo -e " sensor $i driver_name: `cat driver_name` on port `cat port_name` "
-        echo -e "address:              `cat address`"
+        # echo -e "address:              `cat address`"
         echo -e "mode:                 `cat mode`"
         echo -e "modes:                `cat modes`"
         echo -e "commands:             ${cmd}"

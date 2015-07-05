@@ -17,6 +17,16 @@
 # 20141020 BL       Added reverse colors 
 # 20141213 BL       Add escapes to the colors so Bash knows they are 
 #                   "non-printable"
+# 20150521 BL       adapt for kernel 3.16.7-ckt11-5-ev3dev-ev3
+#                   no longer ev3:red:left
+#                             ev3:green:left
+#                             ev3:red:right
+#                             ev3:green:right
+#                         but ev3-left0:red:ev3dev
+#                             ev3-left1:green:ev3dev
+#                             ev3-right0:red:ev3dev
+#                             ev3-right1:green:ev3dev
+
 #============================================================================
 
 
@@ -213,20 +223,20 @@ OFFred () {
 #
 # function to switch OFF the red EV3-leds (left and right)
 #
-  echo none > /sys/class/leds/ev3\:red\:right/trigger
-  echo    0 > /sys/class/leds/ev3\:red\:right/brightness
-  echo none > /sys/class/leds/ev3\:red\:left/trigger
-  echo    0 > /sys/class/leds/ev3\:red\:left/brightness
+  echo none > /sys/class/leds/ev3-right0\:red\:ev3dev/trigger
+  echo    0 > /sys/class/leds/ev3-right0\:red\:ev3dev/brightness
+  echo none > /sys/class/leds/ev3-left0\:red\:ev3dev/trigger
+  echo    0 > /sys/class/leds/ev3-left0\:red\:ev3dev/brightness
 }
 
 OFFgreen () {
 #
 # function to switch OFF the green EV3-leds (left and right)
 #
-  echo none > /sys/class/leds/ev3\:green\:left/trigger
-  echo    0 > /sys/class/leds/ev3\:green\:left/brightness
-  echo none > /sys/class/leds/ev3\:green\:right/trigger
-  echo    0 > /sys/class/leds/ev3\:green\:right/brightness
+  echo none > /sys/class/leds/ev3-left1\:green\:ev3dev/trigger
+  echo    0 > /sys/class/leds/ev3-left1\:green\:ev3dev/brightness
+  echo none > /sys/class/leds/ev3-right1\:green\:ev3dev/trigger
+  echo    0 > /sys/class/leds/ev3-right1\:green\:ev3dev/brightness
 }
 
 OFFleds () {

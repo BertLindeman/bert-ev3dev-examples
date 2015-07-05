@@ -20,48 +20,57 @@
 #                     use to make sliding colors
 # 20140826 BL       o Added script header
 #                   o Show in the terminal what is being done.
+# 20150521 BL       adapt for kernel 3.16.7-ckt11-5-ev3dev-ev3
+#                   no longer ev3:red:left
+#                             ev3:green:left
+#                             ev3:red:right
+#                             ev3:green:right
+#                         but ev3-left0:red:ev3dev
+#                             ev3-left1:green:ev3dev
+#                             ev3-right0:red:ev3dev
+#                             ev3-right1:green:ev3dev
 #============================================================================
 #
 . /usr/local/bin/bert_ev3dev_functions
 
 
 # echo "   deactivate first"
-echo none > /sys/class/leds/ev3\:green\:right/trigger
-echo none > /sys/class/leds/ev3\:red\:right/trigger
-echo none > /sys/class/leds/ev3\:green\:left/trigger
-echo none > /sys/class/leds/ev3\:red\:left/trigger
+echo none > /sys/class/leds/ev3-right1\:green\:ev3dev/trigger
+echo none > /sys/class/leds/ev3-right0\:red\:ev3dev/trigger
+echo none > /sys/class/leds/ev3-left1\:green\:ev3dev/trigger
+echo none > /sys/class/leds/ev3-left0\:red\:ev3dev/trigger
 OFFleds
 sleep 0.5s
 
 # red    -- green
-echo 255 > /sys/class/leds/ev3\:red\:left/brightness
-echo 255 > /sys/class/leds/ev3\:green\:right/brightness
+echo 255 > /sys/class/leds/ev3-left0\:red\:ev3dev/brightness
+echo 255 > /sys/class/leds/ev3-right1\:green\:ev3dev/brightness
 sleep 0.5s
 
 # green  -- red 
-echo   0 > /sys/class/leds/ev3\:red\:left/brightness
-echo 255 > /sys/class/leds/ev3\:red\:right/brightness
-echo 255 > /sys/class/leds/ev3\:green\:left/brightness
-echo   0 > /sys/class/leds/ev3\:green\:right/brightness
+echo   0 > /sys/class/leds/ev3-left0\:red\:ev3dev/brightness
+echo 255 > /sys/class/leds/ev3-right0\:red\:ev3dev/brightness
+echo 255 > /sys/class/leds/ev3-left1\:green\:ev3dev/brightness
+echo   0 > /sys/class/leds/ev3-right1\:green\:ev3dev/brightness
 sleep 0.5s
-echo 255 > /sys/class/leds/ev3\:red\:left/brightness
-echo   0 > /sys/class/leds/ev3\:red\:right/brightness
-echo   0 > /sys/class/leds/ev3\:green\:left/brightness
-echo 255 > /sys/class/leds/ev3\:green\:right/brightness
+echo 255 > /sys/class/leds/ev3-left0\:red\:ev3dev/brightness
+echo   0 > /sys/class/leds/ev3-right0\:red\:ev3dev/brightness
+echo   0 > /sys/class/leds/ev3-left1\:green\:ev3dev/brightness
+echo 255 > /sys/class/leds/ev3-right1\:green\:ev3dev/brightness
 sleep 0.5s
 
 OFFleds
 
-echo 255 > /sys/class/leds/ev3\:green\:left/brightness
-echo 255 > /sys/class/leds/ev3\:green\:right/brightness
+echo 255 > /sys/class/leds/ev3-left1\:green\:ev3dev/brightness
+echo 255 > /sys/class/leds/ev3-right1\:green\:ev3dev/brightness
 sleep 1s
 OFFgreen
 sleep 0.25s
 for (( b1=0; b1<=255; b1++ )); do
-  echo         $b1   > /sys/class/leds/ev3\:green\:left/brightness
-  echo  $((255-$b1)) > /sys/class/leds/ev3\:red\:left/brightness
-  echo         $b1   > /sys/class/leds/ev3\:red\:right/brightness
-  echo  $((255-$b1)) > /sys/class/leds/ev3\:green\:right/brightness
+  echo         $b1   > /sys/class/leds/ev3-left1\:green\:ev3dev/brightness
+  echo  $((255-$b1)) > /sys/class/leds/ev3-left0\:red\:ev3dev/brightness
+  echo         $b1   > /sys/class/leds/ev3-right0\:red\:ev3dev/brightness
+  echo  $((255-$b1)) > /sys/class/leds/ev3-right1\:green\:ev3dev/brightness
   sleep 0.005s
 done
 sleep 1s
