@@ -238,9 +238,14 @@ _site/
 TODO.txt
 perldoc
 *.prev.*
+*_prev
 *.old
 *.crlf
 calc_ntp_good
 calc_ntp_good.*
 package-stash-conflicts
 *_v1.1
+grunt
+listports_pre_3.16.1-8
+showactivityprev
+showsensors_pre_3.16.1-8

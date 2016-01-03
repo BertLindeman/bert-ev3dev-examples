@@ -19,15 +19,8 @@
 # 20140914 BL       Also use the actual voltage to set the blinkling
 # 20140826 BL       o Add script header
 #                   o try to prevent abmber blinking flipflop red/green
-# 20150521 BL       adapt for kernel 3.16.7-ckt11-5-ev3dev-ev3
-#                   no longer ev3:red:left 
-#                             ev3:green:left
-#                             ev3:red:right 
-#                             ev3:green:right
-#                   but ev3-left0:red:ev3dev
-#                       ev3-left1:green:ev3dev
-#                       ev3-right0:red:ev3dev
-#                       ev3-right1:green:ev3dev
+# 20151230 BL       Adapt to image 20151230. New file names for leds.
+#
 #============================================================================
 
 
@@ -70,38 +63,33 @@ get_delay() {
 # to prevent flipflopping red<-->green set triggers close to eachother  
 # not ALWAYS successful. Do not have a way (yet) to ensure
 # AMBER leds and not flip=flopping green/red
-#                       ev3-left0:red:ev3dev
-#                       ev3-left1:green:ev3dev
-#                       ev3-right0:red:ev3dev
-#                       ev3-right1:green:ev3dev
-
 setAmber() {
-      echo timer > /sys/class/leds/ev3-${side}*:green:ev3dev/trigger
-      echo timer > /sys/class/leds/ev3-${side}*:red:ev3dev/trigger
-      echo 500   > /sys/class/leds/ev3-${side}*:green:ev3dev/delay_on
-      echo 500   > /sys/class/leds/ev3-${side}*:red:ev3dev/delay_on
-      echo 500   > /sys/class/leds/ev3-${side}*:green:ev3dev/delay_off
-      echo 500   > /sys/class/leds/ev3-${side}*:red:ev3dev/delay_off
-      echo $delay_off > /sys/class/leds/ev3-${side}*:green:ev3dev/delay_off
-      echo $delay_off > /sys/class/leds/ev3-${side}*:red:ev3dev/delay_off
-      echo $delay_on  > /sys/class/leds/ev3-${side}*:green:ev3dev/delay_on
-      echo $delay_on  > /sys/class/leds/ev3-${side}*:red:ev3dev/delay_on
-      echo $intens    > /sys/class/leds/ev3-${side}*:green:ev3dev/brightness
-      echo $intens    > /sys/class/leds/ev3-${side}*:red:ev3dev/brightness
+      echo timer      > /sys/class/leds/ev3:$side:green:ev3dev/trigger
+      echo timer      > /sys/class/leds/ev3:$side:red:ev3dev/trigger
+      echo 500        > /sys/class/leds/ev3:$side:green:ev3dev/delay_on
+      echo 500        > /sys/class/leds/ev3:$side:red:ev3dev/delay_on
+      echo 500        > /sys/class/leds/ev3:$side:green:ev3dev/delay_off
+      echo 500        > /sys/class/leds/ev3:$side:red:ev3dev/delay_off
+      echo $delay_off > /sys/class/leds/ev3:$side:green:ev3dev/delay_off
+      echo $delay_off > /sys/class/leds/ev3:$side:red:ev3dev/delay_off
+      echo $delay_on  > /sys/class/leds/ev3:$side:green:ev3dev/delay_on
+      echo $delay_on  > /sys/class/leds/ev3:$side:red:ev3dev/delay_on
+      echo $intens    > /sys/class/leds/ev3:$side:green:ev3dev/brightness
+      echo $intens    > /sys/class/leds/ev3:$side:red:ev3dev/brightness
 }
 
 setRed() {
-      echo timer      > /sys/class/leds/ev3-${side}*:red:ev3dev/trigger
-      echo $intens    > /sys/class/leds/ev3-${side}*:red:ev3dev/brightness
-      echo $delay_on  > /sys/class/leds/ev3-${side}*:red:ev3dev/delay_on
-      echo $delay_off > /sys/class/leds/ev3-${side}*:red:ev3dev/delay_off
+      echo timer      > /sys/class/leds/ev3:$side:red:ev3dev/trigger
+      echo $intens    > /sys/class/leds/ev3:$side:red:ev3dev/brightness
+      echo $delay_on  > /sys/class/leds/ev3:$side:red:ev3dev/delay_on
+      echo $delay_off > /sys/class/leds/ev3:$side:red:ev3dev/delay_off
 }
 
 setGrn() {
-      echo timer      > /sys/class/leds/ev3-${side}*:green:ev3dev/trigger
-      echo $intens    > /sys/class/leds/ev3-${side}*:green:ev3dev/brightness
-      echo $delay_on  > /sys/class/leds/ev3-${side}*:green:ev3dev/delay_on
-      echo $delay_off > /sys/class/leds/ev3-${side}*:green:ev3dev/delay_off
+      echo timer      > /sys/class/leds/ev3:$side:green:ev3dev/trigger
+      echo $intens    > /sys/class/leds/ev3:$side:green:ev3dev/brightness
+      echo $delay_on  > /sys/class/leds/ev3:$side:green:ev3dev/delay_on
+      echo $delay_off > /sys/class/leds/ev3:$side:green:ev3dev/delay_off
 
 }  
     
@@ -122,11 +110,11 @@ setGrn() {
   fi
 
   # first set all left colors OFF
-  ledbase="/sys/class/leds/ev3-${side}*:red:ev3dev"
+  ledbase="/sys/class/leds/ev3:$side:red:ev3dev"
   echo none > $ledbase/trigger
   echo    0 > $ledbase/brightness
   
-  ledbase="/sys/class/leds/ev3-${side}*:green:ev3dev"
+  ledbase="/sys/class/leds/ev3:$side:green:ev3dev"
   echo none > $ledbase/trigger
   echo    0 > $ledbase/brightness
  

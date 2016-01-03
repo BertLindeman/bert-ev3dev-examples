@@ -16,7 +16,7 @@
 #
 # Changelog
 # Date     By       Description
-#
+# 20160103 BL       adapt to image 20151230 (change filenames)
 #
 #
 . /usr/local/bin/bert_ev3dev_functions
@@ -47,22 +47,22 @@ showmotor_attr() {
 }
 
 findPortnumber () {
-  # find on which port* the port_name is controlled
+  # find on which port* the address is controlled
   local port portctl
-  local port_name
-  local intl_port_dir intl_port_name
+  local address
+  local intl_port_dir intl_address
   local curmodes wantmode
   port="${1}"
-  portctl=/sys/class/lego-port/port*/port_name  
+  portctl=/sys/class/lego-port/port*/address  
   CTL_PATH=""
   #  set -x
   for IOPORT in ${portctl}
   do
-     port_name="`cat \"${IOPORT}\"`"
+     address="`cat \"${IOPORT}\"`"
      intl_port_dir="`dirname ${IOPORT}`"
-     intl_port_name="`basename ${intl_port_dir}`"
-     if [ "${port_name}" == "${port}" ]; then
-       echo "port \"${port}\" found on \"${intl_port_name}\""
+     intl_address="`basename ${intl_port_dir}`"
+     if [ "${address}" == "${port}" ]; then
+       echo "port \"${port}\" found on \"${intl_address}\""
        # ls -l ${intl_port_dir}/
        curmodes=`cat ${intl_port_dir}/modes`
        wantmode="rcx-motor"

@@ -20,7 +20,8 @@
 #                     kernel version 3.16.1-8-ev3dev
 # 20150109 BL       update for 3.16.7
 #                   o device_name -> driver_name
-# 20150614 BL       field address no longer exists
+# 20160103 BL       adapt to image 20151230 (change filenames)
+#
 #============================================================================
 #
 selectport=${1:-}
@@ -38,10 +39,10 @@ do
   # echo -e "Process $i \"${sensors[$i]}\""
   if [ -e "${sensors[$i]}" ]; then
       cd "${sensors[$i]}"
-      if [ "$#" == 0 ] || [ "$selectport" == "`cat port_name`" ]; then
+      if [ "$#" == 0 ] || [ "$selectport" == "`cat address`" ]; then
       
       
-#cat port_name
+#cat address
 #cat units
 #cat address 
 #cat bin_data
@@ -75,8 +76,9 @@ do
         fi
       
         echo -e "Process $i `pwd`" 
-        echo -e " sensor $i driver_name: `cat driver_name` on port `cat port_name` "
-        # echo -e "address:              `cat address`"
+#        echo -e " sensor $i device_name: `cat device_name` on port `cat address` "
+        echo -e " sensor $i driver_name: `cat driver_name` on port `cat address` "
+        echo -e "address:              `cat address`"
         echo -e "mode:                 `cat mode`"
         echo -e "modes:                `cat modes`"
         echo -e "commands:             ${cmd}"

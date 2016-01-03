@@ -17,16 +17,7 @@
 # 20141020 BL       Added reverse colors 
 # 20141213 BL       Add escapes to the colors so Bash knows they are 
 #                   "non-printable"
-# 20150521 BL       adapt for kernel 3.16.7-ckt11-5-ev3dev-ev3
-#                   no longer ev3:red:left
-#                             ev3:green:left
-#                             ev3:red:right
-#                             ev3:green:right
-#                         but ev3-left0:red:ev3dev
-#                             ev3-left1:green:ev3dev
-#                             ev3-right0:red:ev3dev
-#                             ev3-right1:green:ev3dev
-
+# 20160103 BL       Adapt to image 20151230 (change led file names)
 #============================================================================
 
 
@@ -89,8 +80,8 @@ findsensorctl () {
   # for d in /sys/class/msensor/sensor*;
   for d in /sys/class/lego-sensor/sensor*;
   do
-    if [ -r "$d/port_name" ]; then
-      port=`cat $d/port_name`
+    if [ -r "$d/address" ]; then
+      port=`cat $d/address`
       if [ "$port" == "in${portparm}" ]; then
         CURSENSOR=${d: -1:1}
         # take the numeric part at the end of the basename:
@@ -205,8 +196,8 @@ findmotorctl () {
 #  for d in /sys/class/tacho-motor/motor*/ /sys/class/dc-motor/motor*/ /sys/class/servo-motor/motor*/ ;
   for d in /sys/class/*motor/motor*/  ;
   do
-    if [ -r "$d/port_name" ]; then
-      port=`cat $d/port_name`
+    if [ -r "$d/address" ]; then
+      port=`cat $d/address`
       SEENPORT="$SEENPORT $port"
       if [ "$port" == "out$parm1" ]; then
         CURMOTOR=${d:0:-1}
@@ -223,20 +214,20 @@ OFFred () {
 #
 # function to switch OFF the red EV3-leds (left and right)
 #
-  echo none > /sys/class/leds/ev3-right0\:red\:ev3dev/trigger
-  echo    0 > /sys/class/leds/ev3-right0\:red\:ev3dev/brightness
-  echo none > /sys/class/leds/ev3-left0\:red\:ev3dev/trigger
-  echo    0 > /sys/class/leds/ev3-left0\:red\:ev3dev/brightness
+  echo none > /sys/class/leds/ev3\:right\:red\:ev3dev/trigger
+  echo    0 > /sys/class/leds/ev3\:right\:red\:ev3dev/brightness
+  echo none > /sys/class/leds/ev3\:left\:red\:ev3dev/trigger
+  echo    0 > /sys/class/leds/ev3\:left\:red\:ev3dev/brightness
 }
 
 OFFgreen () {
 #
 # function to switch OFF the green EV3-leds (left and right)
 #
-  echo none > /sys/class/leds/ev3-left1\:green\:ev3dev/trigger
-  echo    0 > /sys/class/leds/ev3-left1\:green\:ev3dev/brightness
-  echo none > /sys/class/leds/ev3-right1\:green\:ev3dev/trigger
-  echo    0 > /sys/class/leds/ev3-right1\:green\:ev3dev/brightness
+  echo none > /sys/class/leds/ev3\:left\:green\:ev3dev/trigger
+  echo    0 > /sys/class/leds/ev3\:left\:green\:ev3dev/brightness
+  echo none > /sys/class/leds/ev3\:right\:green\:ev3dev/trigger
+  echo    0 > /sys/class/leds/ev3\:right\:green\:ev3dev/brightness
 }
 
 OFFleds () {

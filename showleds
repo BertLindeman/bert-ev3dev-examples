@@ -23,6 +23,8 @@
 # 20140826 BL       o Show delay_on and delay_off if available for 
 #                     this led and for it's trigger
 #                   o adapt usage clause (no parameters)
+# 20150518 BL       try to adapt for Raspberry Pi
+# 20160103 BL       adapt to image 20151230 (change filenames)
 #
 #============================================================================
 #
@@ -44,23 +46,87 @@ declare _A delayON
 declare _A delayOFF
 declare _A portix
 
-#showLEDtrigger () {
-# # echo "showing trigger from $1"
-# for word in `cat $1` ;
-#  do
-#    delim=${word:0:1}${word:${#word}-1:1}
-#    if [ $delim == "[]" ]; then
-#      trigger=${word:1:${#word}-2}
-#      break # do not search further
-#    else
-#      trigger=$word  
-#    fi
-#  done
-#  currenttrigger=$trigger 
-#  if [ $currenttrigger == "none" ]; then triggercol=$white
-#                                    else triggercol=$brblue
-#  fi                                   
-#}
+#
+ findled=`/bin/ls -d /sys/class/leds/*   2>/dev/null`
+ 
+# for side in 0 1 ;
+for ledbase in $findled;
+do
+    icol=0  
+    iside=0
+    #  ledbase="/sys/class/leds/led$side" # should be "over var" ev3:$ledcolor:$side"
+    ledbrightness="$ledbase/brightness"
+    ledMAXbrightness="$ledbase/max_brightness"
+    delay_onpath="$ledbase/delay_on"
+    delay_offpath="$ledbase/delay_off"
+    ledtriggerpath="$ledbase/trigger"
+
+    brightness=$(echo "`cat $ledbrightness`")
+    brightnessArr[$icol$iside]=$brightness
+
+    Maxbrightness=$(echo "`cat $ledMAXbrightness`")
+    MaxbrightnessArr[$icol$iside]=$Maxbrightness
+
+    showtrigger "`cat $ledtriggerpath`"
+    triggerArr[$icol$iside]=${currenttrigger:0:40}
+    if [ $currenttrigger == "none" ]; then triggerCol[$icol$iside]=$white
+                                      else triggerCol[$icol$iside]=$brblue
+    fi                      
+    # triggerCol[$icol$iside]=$triggercol 
+    if [ -e "$delay_onpath" ];  then  delayON[$icol$iside]=$(echo "`cat $delay_onpath`")
+    else                              delayON[$icol$iside]="."
+    fi
+    if [ -e "$delay_offpath" ]; then delayOFF[$icol$iside]=$(echo "`cat $delay_offpath`")
+    else                             delayOFF[$icol$iside]="."
+    fi
+
+
+#   clear
+
+    echo -e "${endColor}\nReport from ${ledbase} \n"
+    # header
+    printf "$brwhite%-6s %-11s %10s %8s %8s %-40s$white\n" "color" "MAX_brightn" "Brightness" " dly_ON" "dly_OFF" "trigger"
+    printf "$brwhite%-6s %-11s %10s %8s %8s %-40s$white\n" "/port" "-----------" "----------" " ------" "-------" "-------"
+    ledcolor=""
+
+ # for side in 0 1 ;
+ # do  
+    #  if [ $ledcolor == "red"  ]; then icol=0  ; else icol=1 ;  fi      
+    #  if [ $side     == "left" ]; then iside=0 ; else iside=1;  fi      
+
+      curColor=" " # \$br$ledcolor # dereference $ledcolor to get bright colorcode for ledcolor
+      
+    #  if [ "$side" == "right" ] ; then
+    #    curside="right"; sidealign=""  # results in %11s so align right
+    #  else  
+    #    curside="left" ; sidealign="-" # results in %-11s so align left
+    #  fi
+      sidealign=""
+      curside=" "
+      if [ ${brightnessArr[$icol$iside]} == "0" ]; then brightnessCol=$white
+                                                   else brightnessCol=$brgreen
+      fi
+      if [ ${delayON[$icol$iside]}       == "0" ]; then delay_onCol=$white
+                                                   else delay_onCol=$brgreen
+      fi
+      if [ ${delayOFF[$icol$iside]}      == "0" ]; then delay_offCol=$white
+                                                   else delay_offCol=$brgreen
+      fi
+      # set -x
+      printf "`eval echo $curColor`%-6s ${white}%${sidealign}11s ${brightnessCol}%10s$white ${delay_onCol}%8s$white ${delay_offCol}%8s$white ${triggerCol[$icol$iside]}%-40s\n" \
+      "$ledcolor" \
+      "${MaxbrightnessArr[$icol$iside]}" \
+      "${brightnessArr[$icol$iside]}" \
+      "${delayON[$icol$iside]}" \
+      "${delayOFF[$icol$iside]}" \
+      "${triggerArr[$icol$iside]}" 
+      # set +x
+  done 
+
+  echo -e " ${endColor} " # back to normal
+
+exit
+
 
 for side in left right ;
 do
@@ -223,4 +289,4 @@ done
   done 
  fi
   echo -e " ${endColor} " # back to normal
-  
+    
